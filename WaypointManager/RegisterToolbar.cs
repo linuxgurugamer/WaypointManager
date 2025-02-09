@@ -18,5 +18,20 @@ namespace WaypointManager
             Log = new Log("WaypointManager", Log.LEVEL.ERROR);
 #endif
         }
+
+        bool initted = false;
+        int cnt = 0;
+        void OnGUI()
+        {
+            if (!initted)
+            {
+                if (cnt++ == 3)
+                {
+                    WaypointFlightRenderer.SetupStyles();
+                    initted = true;
+                }
+
+            }
+        }
     }
 }

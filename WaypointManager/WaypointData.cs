@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using Contracts;
 using FinePrint;
+using static WaypointManager.RegisterToolbar;
 
 namespace WaypointManager
 {
@@ -83,8 +84,10 @@ namespace WaypointManager
         {
             if (lastCacheUpdate == UnityEngine.Time.fixedTime || FinePrint.WaypointManager.Instance() == null)
             {
+            if (lastCacheUpdate == UnityEngine.Time.fixedTime || FinePrint.WaypointManager.Instance() == null)
                 return;
             }
+
             lastCacheUpdate = UnityEngine.Time.fixedTime;
 
             bool changed = false;
@@ -95,7 +98,6 @@ namespace WaypointManager
                 if (w != null && w.isNavigatable)
                 {
                     WaypointData wpd;
-
                     // Update values that are only cached once
                     if (!waypointData.ContainsKey(w))
                     {
@@ -161,6 +163,7 @@ namespace WaypointManager
 
             if (changed || customWaypoints.waypointByContract.Count + siteWaypoints.waypointByContract.Count != FinePrint.WaypointManager.Instance().Waypoints.Count())
             {
+
                 // Clear the by contract list
                 foreach (ContractContainer cc in contractMap.Values)
                 {
@@ -170,6 +173,7 @@ namespace WaypointManager
                 siteWaypoints.waypointByContract.Clear();
 
                 // Rebuild the by contract list
+                int cnt = 0;
                 foreach (WaypointData wpd in waypointData.Values)
                 {
                     if (wpd.waypoint.contractReference != null)

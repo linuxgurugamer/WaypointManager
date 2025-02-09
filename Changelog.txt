@@ -1,5 +1,10 @@
 Changelog
 
+2.8.4.4
+	Updated text in Settings window re. dragging the Nav Window
+	Small optimization regarding initializing styles, eliminating an extra function call during OnGUI
+	Fixed nav window initialization (was not setting background/opacity upon startup)
+
 2.8.4.3
 	Thanks to github user @eminterrupted for finding this bug:
 		displayOpacity was being read incorrectly from the saved config, causing the display background opacity to be reset to 50% every game restart

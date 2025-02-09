@@ -71,7 +71,6 @@ namespace WaypointManager
             visible = true;
         }
 
-        new bool enabled = false;
 
         bool drag = false;
         float offset_x;
@@ -135,8 +134,6 @@ namespace WaypointManager
 
                 if (HighLogic.LoadedSceneIsFlight && !MapView.MapIsEnabled)
                 {
-                    SetupStyles();
-
                     WaypointData.CacheWaypointData();
 
                     foreach (WaypointData wpd in WaypointData.Waypoints)
@@ -188,7 +185,6 @@ namespace WaypointManager
             }
             OldUIScale = GameSettings.UI_SCALE;
             oldScaling = Config.scaling;
-
             finalScaling = GameSettings.UI_SCALE * Config.scaling;
 
             boxHeight = 20f * finalScaling;

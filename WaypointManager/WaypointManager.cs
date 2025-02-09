@@ -647,7 +647,7 @@ namespace WaypointManager
                 Config.displayOpacity = GUILayout.HorizontalSlider(Config.displayOpacity, 0.0f, 1f);
                 GUILayout.Label("Background Display (grey scale)");
                 Config.backgroundGrey = GUILayout.HorizontalSlider(Config.backgroundGrey, 0.0f, 1f);
-                GUILayout.Label("Nav Window Horizontal Position can be dragged by holding Control + mouse left/right and dragging");
+                GUILayout.Label("Nav Window position can be dragged by holding Control + mouse left/right and dragging");
 
 
 #if false

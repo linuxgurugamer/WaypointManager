@@ -159,6 +159,7 @@ namespace WaypointManager
             {
                 backgroundGrey = configNode.HasValue("backgroundGrey") ? (float)Convert.ToDouble(configNode.GetValue("backgroundGrey")) : 0.0f;
             }
+            WaypointFlightRenderer.SetupStyles(true);
 
         }
 
