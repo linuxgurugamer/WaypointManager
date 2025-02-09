@@ -1,5 +1,11 @@
 Changelog
 
+2.8.4.3
+	Thanks to github user @eminterrupted for finding this bug:
+		displayOpacity was being read incorrectly from the saved config, causing the display background opacity to be reset to 50% every game restart
+	Added text to config window explaining how to drag the nav window
+	Updated version file to use github for version info
+
 2.8.4.2
 	Fixed Next flight without changing any settings, grey background is absent
 	    Multiple initializions are needed because KSP/Unity is stupid and loses the background texture between scenes

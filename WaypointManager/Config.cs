@@ -102,7 +102,7 @@ namespace WaypointManager
             configNode.AddValue("displayOpacity", displayOpacity);
             configNode.AddValue("backgroundGrey", backgroundGrey);
 
-            
+
 
             configNode.Save(ConfigFileName,
                 "Waypoint Manager Configuration File\r\n" +
@@ -154,10 +154,10 @@ namespace WaypointManager
             {
                 displayOpacity = configNode.HasValue("displayOpacity") ? (float)Convert.ToDouble(configNode.GetValue("displayOpacity")) : 0.0f;
             }
-            
+
             if (configNode.HasValue("backgroundGrey"))
             {
-                displayOpacity = configNode.HasValue("backgroundGrey") ? (float)Convert.ToDouble(configNode.GetValue("backgroundGrey")) : 0.0f;
+                backgroundGrey = configNode.HasValue("backgroundGrey") ? (float)Convert.ToDouble(configNode.GetValue("backgroundGrey")) : 0.0f;
             }
 
         }

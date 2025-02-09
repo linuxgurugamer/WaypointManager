@@ -428,7 +428,8 @@ namespace WaypointManager
 
             if (Config.boxLeft < 0)
             {
-                Config.boxLeft = (Screen.width - leftLabelBoxSize.x - rightLabelBoxSize.x - 5) / 2;
+                //Config.boxLeft = (Screen.width - leftLabelBoxSize.x - rightLabelBoxSize.x - 5) / 2;
+                Config.boxLeft = (Screen.width - leftLabelBoxSize.x - rightLabelBoxSize.x - 5) * 0.5f;
             }
             if (Config.boxTop < 0)
             {
