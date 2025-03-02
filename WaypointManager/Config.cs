@@ -59,6 +59,7 @@ namespace WaypointManager
         public static bool hudTime = true;
         public static bool hudHeading = false;
         public static bool hudAngle = false;
+        public static bool hudCoordinates = false;
 
         public static float opacity = 1.0f;
 
@@ -95,6 +96,7 @@ namespace WaypointManager
             configNode.AddValue("hudAngle", hudAngle);
             configNode.AddValue("displayDecimal", displayDecimal);
             configNode.AddValue("opacity", opacity);
+            configNode.AddValue("hudCoordinates", hudCoordinates);
             configNode.AddValue("scaling", scaling);
 
             configNode.AddValue("boxTop", boxTop);
@@ -138,6 +140,7 @@ namespace WaypointManager
             hudDistance = Convert.ToBoolean(configNode.GetValue("hudDistance"));
             hudTime = Convert.ToBoolean(configNode.GetValue("hudTime"));
             hudHeading = Convert.ToBoolean(configNode.GetValue("hudHeading"));
+            hudCoordinates = Convert.ToBoolean(configNode.GetValue("hudCoordinates"));
             hudAngle = configNode.HasValue("hudAngle") ? Convert.ToBoolean(configNode.GetValue("hudAngle")) : false;
             opacity = configNode.HasValue("opacity") ? (float)Convert.ToDouble(configNode.GetValue("opacity")) : 1.0f;
             displayDecimal = configNode.HasValue("displayDecimal") ? Convert.ToBoolean(configNode.GetValue("displayDecimal")) : false;

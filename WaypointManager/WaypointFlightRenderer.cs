@@ -328,6 +328,11 @@ namespace WaypointManager
                                 ShowText("Velocity pitch angle:", v.state != Vessel.State.DEAD ? velAngle.ToString("N2") : "N/A");
                             }
                         }
+                        if (Config.hudCoordinates && v.mainBody == wpd.celestialBody)
+                        {
+                            ShowText("Coordinates of " + label + ":", v.state != Vessel.State.DEAD ? string.Format("{0}\r\n{1}", Util.DecimalDegreesToDMS(wpd.waypoint.latitude, true), Util.DecimalDegreesToDMS(wpd.waypoint.longitude, false)) : "N/A");
+                        }
+
                         Config.displayBox = new Rect(Config.boxLeft, Config.boxTop, boxWidth, fullBoxHeight);
                     }
                 }

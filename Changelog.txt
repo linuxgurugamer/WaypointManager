@@ -1,5 +1,8 @@
 Changelog
 
+2.8.4.5
+	Added option to display Waypoint Coordinates, based on code from github user @David Shade
+
 2.8.4.4
 	Updated text in Settings window re. dragging the Nav Window
 	Small optimization regarding initializing styles, eliminating an extra function call during OnGUI

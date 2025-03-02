@@ -593,6 +593,10 @@ namespace WaypointManager
                 {
                     Config.hudAngle = !Config.hudAngle;
                 }
+                if (GUILayout.Toggle(Config.hudCoordinates, "Coordinates of target") != Config.hudCoordinates)
+                {
+                    Config.hudCoordinates = !Config.hudCoordinates;
+                }
 
                 // Display style
                 GUILayout.Label("Location display style", headingStyle);
