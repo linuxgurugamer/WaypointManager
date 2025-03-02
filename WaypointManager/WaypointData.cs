@@ -91,12 +91,14 @@ namespace WaypointManager
             lastCacheUpdate = UnityEngine.Time.fixedTime;
 
             bool changed = false;
-
+            int cnt = 0;
             // Add new waypoints
             foreach (Waypoint w in FinePrint.WaypointManager.Instance().Waypoints)
             {
+                //cnt++;
                 if (w != null && w.isNavigatable)
                 {
+                    //Log.Info("cnt: " + cnt + ", name: " + w.name + ", w.isClustered: " + w.isClustered + ", w.isCustom: " + w.isCustom + ", isMission: " + w.isMission);
                     WaypointData wpd;
                     // Update values that are only cached once
                     if (!waypointData.ContainsKey(w))
@@ -173,7 +175,6 @@ namespace WaypointManager
                 siteWaypoints.waypointByContract.Clear();
 
                 // Rebuild the by contract list
-                int cnt = 0;
                 foreach (WaypointData wpd in waypointData.Values)
                 {
                     if (wpd.waypoint.contractReference != null)
