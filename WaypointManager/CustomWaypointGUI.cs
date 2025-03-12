@@ -391,7 +391,7 @@ namespace WaypointManager
         private static void DeleteGUI(int windowID)
         {
             GUILayout.BeginVertical();
-            GUILayout.Label("Delete custom waypoint '" + selectedWaypoint.name + "'?");
+            GUILayout.Label("Delete waypoint '" + selectedWaypoint.name + "'?");
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Yes"))
             {
