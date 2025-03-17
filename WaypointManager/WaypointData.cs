@@ -96,6 +96,15 @@ namespace WaypointManager
             foreach (Waypoint w in FinePrint.WaypointManager.Instance().Waypoints)
             {
                 //cnt++;
+
+#if false // These used to dump info needed to debug City2 issue with Kopernicus
+                Log.Info("WorldPosition: " + w.worldPosition);
+                Log.Info("orbitPosition: " + w.orbitPosition);
+                Log.Info("name: " + w.name + ", latitude: " + w.latitude + ", longitude: " + w.longitude + ", Altitude: " + w.altitude);
+#endif
+                // Following added to bypass a Kopernicus error where it puts invalid waypoints into the system
+                if (w.name == "Site"  || w.name == "Sun")
+                    continue;
                 if (w != null && w.isNavigatable)
                 {
                     //Log.Info("cnt: " + cnt + ", name: " + w.name + ", w.isClustered: " + w.isClustered + ", w.isCustom: " + w.isCustom + ", isMission: " + w.isMission);

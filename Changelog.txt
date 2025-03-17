@@ -1,5 +1,10 @@
 Changelog
 
+2.8.4.6 
+	Thanks to github user @Clayell for this:
+		Edit a GUI label that is not specific to custom waypoints removing the "custom" since it's not related to custom waypoints
+	Added to bypass a Kopernicus error where it puts invalid waypoints into the system
+
 2.8.4.5
 	Added option to display Waypoint Coordinates, based on code from github user @David Shade
 
