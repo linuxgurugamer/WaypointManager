@@ -91,7 +91,7 @@ namespace WaypointManager
             lastCacheUpdate = UnityEngine.Time.fixedTime;
 
             bool changed = false;
-            int cnt = 0;
+            //int cnt = 0;
             // Add new waypoints
             foreach (Waypoint w in FinePrint.WaypointManager.Instance().Waypoints)
             {
