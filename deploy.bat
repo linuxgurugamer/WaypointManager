@@ -8,6 +8,7 @@ rem VERSIONFILE is the name of the version file, usually the same as GAMEDATA,
 rem    but not always
 
 set H=%KSPDIR%
+set H1=R:\KSP_1.12.5-RP-1
 
 set GAMEDIR=WaypointManager
 set GAMEDATA="GameData"
@@ -23,5 +24,7 @@ copy /Y %VERSIONFILE% %GAMEDATA%\%GAMEDIR%
 
 xcopy /y /s /I %GAMEDATA%\%GAMEDIR% "%H%\GameData\%GAMEDIR%"
 xcopy /y /s /I %GAMEDATA%\%GAMEDIR% "%DP0%\GameData\%GAMEDIR%"
+
+xcopy /y /s /I %GAMEDATA%\%GAMEDIR% "%H1%\GameData\%GAMEDIR%"
 
 rem pause
