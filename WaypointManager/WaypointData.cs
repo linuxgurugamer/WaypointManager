@@ -103,7 +103,7 @@ namespace WaypointManager
                 Log.Info("name: " + w.name + ", latitude: " + w.latitude + ", longitude: " + w.longitude + ", Altitude: " + w.altitude);
 #endif
                 // Following added to bypass a Kopernicus error where it puts invalid waypoints into the system
-                if (w.name == "Site"  || w.celestialBody.bodyName == "Sun")
+                if (w.celestialBody.bodyName == "Sun")
                     continue;
                 if (w != null && w.isNavigatable)
                 {
