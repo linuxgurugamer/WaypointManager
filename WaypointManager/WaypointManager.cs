@@ -120,7 +120,8 @@ namespace WaypointManager
             toolbarControl.AddToAllToolbars(ToggleWindow, ToggleWindow,
                 ApplicationLauncher.AppScenes.FLIGHT |
                 ApplicationLauncher.AppScenes.MAPVIEW |
-                ApplicationLauncher.AppScenes.TRACKSTATION,
+                ApplicationLauncher.AppScenes.TRACKSTATION |
+                ~ApplicationLauncher.AppScenes.MAINMENU,
                 MODID,
                 "waypointMgr",
                 "WaypointManager/PluginData/icons/toolbar",
