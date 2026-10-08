@@ -5,6 +5,6 @@
   
  using System.Reflection;
 
- [assembly: AssemblyFileVersion("2.8.4.7")]
- [assembly: AssemblyVersion("2.8.4.7")]
+ [assembly: AssemblyFileVersion("2.8.4.8")]
+ [assembly: AssemblyVersion("2.8.4.8")]
  [assembly: KSPAssembly("WaypointManager", 2, 8, 4)]

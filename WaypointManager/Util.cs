@@ -172,6 +172,8 @@ namespace WaypointManager
         public static Texture2D GetContractIcon(string url, int seed)
         {
             string key = url;
+            if (url == "dish")
+                url = "marker";
 
             // Check cache for texture
             Texture2D texture;
