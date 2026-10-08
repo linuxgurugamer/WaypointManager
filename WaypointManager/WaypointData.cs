@@ -165,7 +165,9 @@ namespace WaypointManager
 
             lastCacheUpdate = UnityEngine.Time.fixedTime;
 
+#if false
             List<Waypoint> waypointsToRemove = new List<Waypoint>();
+#endif
 
             InitForKopernicus();
 
@@ -190,7 +192,9 @@ namespace WaypointManager
                     Log.Info("WorldPosition: " + w.worldPosition + ", orbitPosition: " + w.orbitPosition + ", FlightGlobals.Bodies[0]: " + FlightGlobals.Bodies[0].bodyName);
                     Log.Info("name: " + w.name + ", latitude: " + w.latitude + ", longitude: " + w.longitude + ", Altitude: " + w.altitude);
 #endif
+#if false
                     waypointsToRemove.Add(w);
+#endif
                     continue;
                 }
                 if (w != null && w.isNavigatable)
