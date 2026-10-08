@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Contracts;
+using FinePrint;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
-using Contracts;
-using FinePrint;
 using static WaypointManager.RegisterToolbar;
 
 namespace WaypointManager
@@ -76,6 +75,81 @@ namespace WaypointManager
         /// Gets all waypoint data keyed by Celestial Body.
         /// </summary>
         public static IEnumerable<KeyValuePair<CelestialBody, List<WaypointData>>> WaypointByBody { get { return waypointByBody.AsEnumerable(); } }
+        static bool city2Initted = false;
+        internal static bool kopernicusCity2Found = false;
+         static void InitForKopernicus()
+        {
+            if (!city2Initted)
+            {
+                city2Initted = true;
+                Log.Info("Loading Kopernicus nodes City2");
+                var db = GameDatabase.Instance.GetConfigNodes("Kopernicus");
+                foreach (var node in db)
+                { 
+                    var bodies = node.GetNodes("Body");
+                    foreach (var b in bodies)
+                    {
+                        var name = b.GetValue("name");
+                        Log.Info("name: " + name + ", homeBody: " + FlightGlobals.GetHomeBodyName() + ", GetHomeBody: " + FlightGlobals.GetHomeBody().bodyName);
+                        if (name == FlightGlobals.GetHomeBodyName() || name == "Kerbin")
+                        {
+                            var pqs = b.GetNodes("PQS");
+                            foreach (var p in pqs)
+                            {
+                                var mods = p.GetNodes("Mods");
+                                foreach (var mod in mods)
+                                {
+                                    var city2 = mod.GetNodes("City2");
+                                    if (city2.Length > 0)
+                                        kopernicusCity2Found = true;
+
+                                    foreach (var city in city2)
+                                    {
+                                        var locname = city.GetValue("name");
+                                        var objectName = city.GetValue("objectName");
+                                        double lat = double.Parse(city.GetValue("lat"));
+                                        double lon = double.Parse(city.GetValue("lon"));
+                                        float alt = float.Parse(city.GetValue("alt"));
+                                        Log.Info("locname: " + locname + ", objectName: " + objectName + ", celestialName: " + FlightGlobals.GetHomeBodyName() + ", lat: " + lat + ", lon: " + lon + ", alt: " + alt);
+                                        Waypoint wp = new Waypoint();
+
+                                        wp.celestialName = FlightGlobals.GetHomeBodyName();
+                                        wp.latitude = lat;
+                                        wp.longitude = lon;
+                                        wp.altitude = alt;
+
+                                        wp.altitude = Util.TerrainHeight(lat, lon, FlightGlobals.GetHomeBody());
+
+                                        wp.seed = UnityEngine.Random.Range(0, int.MaxValue);
+                                        wp.index = 1;
+
+                                        wp.name = objectName;
+                                        wp.id = "marker";
+                                        if (locname.Contains("TrackingStation") || locname.Contains("Tracking Station"))
+                                            wp.id = "dish";
+                                        if (locname.Contains("Elevation"))
+                                            wp.id = "pressure";
+
+                                        wp.isOnSurface = true;
+                                        wp.isNavigatable = true;
+                                        wp.SetFadeRange();
+                                        wp.isOnSurface = true;
+                                        wp.isNavigatable = true;
+                                        wp.enableTooltip = true;
+                                        wp.enableMarker = true;
+
+                                        FinePrint.WaypointManager.AddWaypoint(wp);
+                                        //public static void AddWaypoint(double latitude, double longitude, double altitude)
+
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Caches the waypoint data.
@@ -84,11 +158,15 @@ namespace WaypointManager
         {
             if (lastCacheUpdate == UnityEngine.Time.fixedTime || FinePrint.WaypointManager.Instance() == null)
             {
-            if (lastCacheUpdate == UnityEngine.Time.fixedTime || FinePrint.WaypointManager.Instance() == null)
-                return;
+                if (lastCacheUpdate == UnityEngine.Time.fixedTime || FinePrint.WaypointManager.Instance() == null)
+                    return;
             }
 
             lastCacheUpdate = UnityEngine.Time.fixedTime;
+
+            List<Waypoint> waypointsToRemove = new List<Waypoint>();
+
+            InitForKopernicus();
 
             bool changed = false;
             //int cnt = 0;
@@ -97,14 +175,23 @@ namespace WaypointManager
             {
                 //cnt++;
 
-#if true // These used to dump info needed to debug City2 issue with Kopernicus
+#if false // These used to dump info needed to debug City2 issue with Kopernicus
                 Log.Info("WorldPosition: " + w.worldPosition);
                 Log.Info("orbitPosition: " + w.orbitPosition);
                 Log.Info("name: " + w.name + ", latitude: " + w.latitude + ", longitude: " + w.longitude + ", Altitude: " + w.altitude);
 #endif
                 // Following added to bypass a Kopernicus error where it puts invalid waypoints into the system
-                if (w.celestialBody.bodyName == "Sun")
+
+                if (/* w.name == "Site" || w.name == "KSC" ) // */ w.celestialBody.bodyName == "Sun" && w.altitude < 100000)
+                {
+
+#if false
+                    Log.Info("WorldPosition: " + w.worldPosition + ", orbitPosition: " + w.orbitPosition + ", FlightGlobals.Bodies[0]: " + FlightGlobals.Bodies[0].bodyName);
+                    Log.Info("name: " + w.name + ", latitude: " + w.latitude + ", longitude: " + w.longitude + ", Altitude: " + w.altitude);
+#endif
+                    waypointsToRemove.Add(w);
                     continue;
+                }
                 if (w != null && w.isNavigatable)
                 {
                     //Log.Info("cnt: " + cnt + ", name: " + w.name + ", w.isClustered: " + w.isClustered + ", w.isCustom: " + w.isCustom + ", isMission: " + w.isMission);
@@ -114,7 +201,8 @@ namespace WaypointManager
                     {
                         wpd = new WaypointData();
                         wpd.waypoint = w;
-                        wpd.celestialBody = Util.GetBody(w.celestialBody.bodyName);
+                        //wpd.celestialBody = Util.GetBody(FlightGlobals.GetHomeBodyName());
+                        wpd.celestialBody = FlightGlobals.GetHomeBody();
 
                         // Small stock bug - the Dessert Airfield has the wrong icon.  Fix it for Squad.
                         if (w.name == "Dessert Airfield" && w.id == "launchsite")
@@ -164,7 +252,24 @@ namespace WaypointManager
                     }
                 }
             }
+#if false
+            if (waypointsToRemove.Count > 0)
+            {
+                //Log.Info("Waypoints to remove: " + waypointsToRemove.Count);
+                foreach (var w in waypointsToRemove)
+                {
+#if false
+                    Log.Info("Removing waypoint: " + w.name + ", " + w.FullName + ", " + w.celestialName);
+                    //Log.Info("WorldPosition: " + w.worldPosition);
+                    //Log.Info("orbitPosition: " + w.orbitPosition);
+                    Log.Info("name: " + w.name + ", latitude: " + w.latitude + ", longitude: " + w.longitude + ", Altitude: " + w.altitude);
+#endif
+                    FinePrint.WaypointManager.RemoveWaypoint(w);
+                    ScenarioCustomWaypoints.RemoveWaypoint(w);
 
+                }
+            }
+#endif
             // Remove unused waypoints
             foreach (KeyValuePair<Waypoint, WaypointData> p in waypointData.Where(p => p.Value.lastChecked != UnityEngine.Time.fixedTime).ToArray())
             {
