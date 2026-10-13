@@ -39,6 +39,7 @@ namespace WaypointManager
         private static double lastCacheUpdate = 0.0;
 
         private static Dictionary<Waypoint, WaypointData> waypointData = new Dictionary<Waypoint, WaypointData>();
+        private static readonly List<Waypoint> removed = new List<Waypoint>();
         private static Dictionary<long, ContractContainer> contractMap = new Dictionary<long, ContractContainer>();
         private static Dictionary<CelestialBody, List<WaypointData>> waypointByBody = new Dictionary<CelestialBody, List<WaypointData>>();
         private static ContractContainer customWaypoints = new ContractContainer(null);
@@ -164,7 +165,9 @@ namespace WaypointManager
 
             lastCacheUpdate = UnityEngine.Time.fixedTime;
 
+#if false
             List<Waypoint> waypointsToRemove = new List<Waypoint>();
+#endif
 
             InitForKopernicus();
 
@@ -189,7 +192,9 @@ namespace WaypointManager
                     Log.Info("WorldPosition: " + w.worldPosition + ", orbitPosition: " + w.orbitPosition + ", FlightGlobals.Bodies[0]: " + FlightGlobals.Bodies[0].bodyName);
                     Log.Info("name: " + w.name + ", latitude: " + w.latitude + ", longitude: " + w.longitude + ", Altitude: " + w.altitude);
 #endif
+#if false
                     waypointsToRemove.Add(w);
+#endif
                     continue;
                 }
                 if (w != null && w.isNavigatable)
@@ -270,14 +275,25 @@ namespace WaypointManager
                 }
             }
 #endif
-            // Remove unused waypoints
-            foreach (KeyValuePair<Waypoint, WaypointData> p in waypointData.Where(p => p.Value.lastChecked != UnityEngine.Time.fixedTime).ToArray())
+            // Remove unused waypoints, and count the ones without a contract
+            int uncontracted = 0;
+            removed.Clear();
+            foreach (KeyValuePair<Waypoint, WaypointData> p in waypointData)
+            {
+                if (p.Value.lastChecked != UnityEngine.Time.fixedTime)
+                    removed.Add(p.Key);
+                else if (p.Value.waypoint.contractReference == null)
+                    uncontracted++;
+            }
+            foreach (Waypoint w in removed)
             {
                 changed = true;
-                waypointData.Remove(p.Key);
+                waypointData.Remove(w);
             }
 
-            if (changed || customWaypoints.waypointByContract.Count + siteWaypoints.waypointByContract.Count != FinePrint.WaypointManager.Instance().Waypoints.Count())
+            // Also rebuild when a waypoint gained or lost its contract. Comparing against every waypoint the game
+            // has (contract ones included) never matched once a contract had waypoints, and rebuilt every frame.
+            if (changed || customWaypoints.waypointByContract.Count + siteWaypoints.waypointByContract.Count != uncontracted)
             {
 
                 // Clear the by contract list
