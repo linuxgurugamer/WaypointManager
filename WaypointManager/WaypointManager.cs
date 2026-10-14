@@ -682,6 +682,14 @@ namespace WaypointManager
                         WaypointData.AddKopernicusNodes();
                     }
                 }
+
+                using (new GUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("Remove all Kopernicus City2 nodes"))
+                    {
+                        WaypointData.ClearKopernicusNodes();
+                    }
+                }
             }
 
             GUI.DragWindow();
