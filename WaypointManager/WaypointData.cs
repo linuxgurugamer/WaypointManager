@@ -133,7 +133,7 @@ namespace WaypointManager
             }
         }
 
-        private static ConfigNode[] FindKopernicusNodes()
+        private static void FindKopernicusNodes()
         {
             if (city2nodes.Length == 0)
             {
@@ -162,8 +162,6 @@ namespace WaypointManager
                     }
                 }
             }
-
-            return city2nodes;
         }
 
         /// <summary>
