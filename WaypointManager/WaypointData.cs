@@ -78,7 +78,7 @@ namespace WaypointManager
         public static IEnumerable<KeyValuePair<CelestialBody, List<WaypointData>>> WaypointByBody { get { return waypointByBody.AsEnumerable(); } }
         static bool city2Initted = false;
         internal static bool kopernicusCity2Found = false;
-         static void InitForKopernicus()
+        internal static void AddKopernicusNodes()
         {
             if (!city2Initted)
             {
@@ -168,8 +168,6 @@ namespace WaypointManager
 #if false
             List<Waypoint> waypointsToRemove = new List<Waypoint>();
 #endif
-
-            InitForKopernicus();
 
             bool changed = false;
             //int cnt = 0;
