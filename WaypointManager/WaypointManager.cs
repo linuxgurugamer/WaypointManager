@@ -674,6 +674,22 @@ namespace WaypointManager
                         Config.Save();
                     }
                 }
+
+                using (new GUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("Add all Kopernicus City2 nodes"))
+                    {
+                        WaypointData.AddKopernicusNodes();
+                    }
+                }
+
+                using (new GUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("Remove all Kopernicus City2 nodes"))
+                    {
+                        WaypointData.ClearKopernicusNodes();
+                    }
+                }
             }
 
             GUI.DragWindow();

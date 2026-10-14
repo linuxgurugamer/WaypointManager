@@ -76,17 +76,71 @@ namespace WaypointManager
         /// Gets all waypoint data keyed by Celestial Body.
         /// </summary>
         public static IEnumerable<KeyValuePair<CelestialBody, List<WaypointData>>> WaypointByBody { get { return waypointByBody.AsEnumerable(); } }
-        static bool city2Initted = false;
-        internal static bool kopernicusCity2Found = false;
-         static void InitForKopernicus()
+        static ConfigNode[] city2nodes = new ConfigNode[0];
+        internal static void AddKopernicusNodes()
         {
-            if (!city2Initted)
+            FindKopernicusNodes();
+
+            foreach (var city in city2nodes)
             {
-                city2Initted = true;
-                Log.Info("Loading Kopernicus nodes City2");
+                var locname = city.GetValue("name");
+                var objectName = city.GetValue("objectName");
+                double lat = double.Parse(city.GetValue("lat"));
+                double lon = double.Parse(city.GetValue("lon"));
+                float alt = float.Parse(city.GetValue("alt"));
+                Log.Info("locname: " + locname + ", objectName: " + objectName + ", celestialName: " + FlightGlobals.GetHomeBodyName() + ", lat: " + lat + ", lon: " + lon + ", alt: " + alt);
+                Waypoint wp = new Waypoint();
+
+                wp.celestialName = FlightGlobals.GetHomeBodyName();
+                wp.latitude = lat;
+                wp.longitude = lon;
+                wp.altitude = alt;
+
+                wp.altitude = Util.TerrainHeight(lat, lon, FlightGlobals.GetHomeBody());
+
+                wp.seed = UnityEngine.Random.Range(0, int.MaxValue);
+                wp.index = 1;
+
+                wp.name = objectName;
+                wp.id = "marker";
+                if (locname.Contains("TrackingStation") || locname.Contains("Tracking Station"))
+                    wp.id = "dish";
+                if (locname.Contains("Elevation"))
+                    wp.id = "pressure";
+
+                wp.isOnSurface = true;
+                wp.isNavigatable = true;
+                wp.SetFadeRange();
+                wp.isOnSurface = true;
+                wp.isNavigatable = true;
+                wp.enableTooltip = true;
+                wp.enableMarker = true;
+
+                FinePrint.WaypointManager.AddWaypoint(wp);
+            }
+        }
+
+        internal static void ClearKopernicusNodes()
+        {
+            FindKopernicusNodes();
+            foreach (var city in city2nodes)
+            {
+                var objectName = city.GetValue("objectName");
+                foreach (var wp in FinePrint.WaypointManager.Instance().Waypoints.Where(wp => wp.name == objectName).ToList())
+                {
+                    FinePrint.WaypointManager.RemoveWaypoint(wp);
+                }
+            }
+        }
+
+        private static void FindKopernicusNodes()
+        {
+            if (city2nodes.Length == 0)
+            {
+                Log.Info("Loading Kopernicus City2 nodes");
                 var db = GameDatabase.Instance.GetConfigNodes("Kopernicus");
                 foreach (var node in db)
-                { 
+                {
                     var bodies = node.GetNodes("Body");
                     foreach (var b in bodies)
                     {
@@ -100,49 +154,7 @@ namespace WaypointManager
                                 var mods = p.GetNodes("Mods");
                                 foreach (var mod in mods)
                                 {
-                                    var city2 = mod.GetNodes("City2");
-                                    if (city2.Length > 0)
-                                        kopernicusCity2Found = true;
-
-                                    foreach (var city in city2)
-                                    {
-                                        var locname = city.GetValue("name");
-                                        var objectName = city.GetValue("objectName");
-                                        double lat = double.Parse(city.GetValue("lat"));
-                                        double lon = double.Parse(city.GetValue("lon"));
-                                        float alt = float.Parse(city.GetValue("alt"));
-                                        Log.Info("locname: " + locname + ", objectName: " + objectName + ", celestialName: " + FlightGlobals.GetHomeBodyName() + ", lat: " + lat + ", lon: " + lon + ", alt: " + alt);
-                                        Waypoint wp = new Waypoint();
-
-                                        wp.celestialName = FlightGlobals.GetHomeBodyName();
-                                        wp.latitude = lat;
-                                        wp.longitude = lon;
-                                        wp.altitude = alt;
-
-                                        wp.altitude = Util.TerrainHeight(lat, lon, FlightGlobals.GetHomeBody());
-
-                                        wp.seed = UnityEngine.Random.Range(0, int.MaxValue);
-                                        wp.index = 1;
-
-                                        wp.name = objectName;
-                                        wp.id = "marker";
-                                        if (locname.Contains("TrackingStation") || locname.Contains("Tracking Station"))
-                                            wp.id = "dish";
-                                        if (locname.Contains("Elevation"))
-                                            wp.id = "pressure";
-
-                                        wp.isOnSurface = true;
-                                        wp.isNavigatable = true;
-                                        wp.SetFadeRange();
-                                        wp.isOnSurface = true;
-                                        wp.isNavigatable = true;
-                                        wp.enableTooltip = true;
-                                        wp.enableMarker = true;
-
-                                        FinePrint.WaypointManager.AddWaypoint(wp);
-                                        //public static void AddWaypoint(double latitude, double longitude, double altitude)
-
-                                    }
+                                    city2nodes = city2nodes.Concat(mod.GetNodes("City2")).ToArray();
                                 }
                             }
                             break;
@@ -168,8 +180,6 @@ namespace WaypointManager
 #if false
             List<Waypoint> waypointsToRemove = new List<Waypoint>();
 #endif
-
-            InitForKopernicus();
 
             bool changed = false;
             //int cnt = 0;
