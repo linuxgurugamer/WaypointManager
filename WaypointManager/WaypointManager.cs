@@ -1,19 +1,18 @@
-﻿using System;
+﻿using ClickThroughFix;
+using Contracts;
+using FinePrint;
+using FinePrint.Utilities;
+using KSP.UI.Screens;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using UnityEngine;
-using KSP;
-using KSP.UI.Screens;
-using Contracts;
-using FinePrint;
-using FinePrint.Utilities;
-
 using ToolbarControl_NS;
-using ClickThroughFix;
+using UnityEngine;
+
 using static WaypointManager.RegisterToolbar;
+
 
 namespace WaypointManager
 {
@@ -31,6 +30,7 @@ namespace WaypointManager
 
         private static bool initialized = false;
         public bool showGUI = false;
+        public bool hidden = false;
         private bool showSettings = false;
         public bool visible = true;
         private bool stylesSetup = false;
@@ -50,15 +50,21 @@ namespace WaypointManager
         static Dictionary<string, Texture2D> bodyIcons = new Dictionary<string, Texture2D>();
         static Dictionary<CelestialBody, bool> hiddenBodies = new Dictionary<CelestialBody, bool>();
 
+        static internal bool kopernicusNodesAdded = false;
+        static bool kopernicusNodexExists = false;
+        static internal bool rightClickEnabled = true;
+
         void Start()
         {
             DontDestroyOnLoad(this);
 
             if (!initialized)
             {
+                var db = GameDatabase.Instance.GetConfigNodes("Kopernicus");
+                kopernicusNodexExists = (db.Length > 0);
+
                 // Log version info
                 var ainfoV = Attribute.GetCustomAttribute(typeof(WaypointManager).Assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
-                Log.Info("WaypointManager " + ainfoV.InformationalVersion + " loading...");
 
                 LoadTextures();
                 LoadConfiguration();
@@ -70,8 +76,6 @@ namespace WaypointManager
                 GameEvents.onPlanetariumTargetChanged.Add(new EventData<MapObject>.OnEvent(PlanetariumTargetChanged));
 
                 Config.Load();
-
-                Log.Info("WaypointManager " + ainfoV.InformationalVersion + " loaded.");
 
                 Instance = this;
                 initialized = true;
@@ -111,13 +115,14 @@ namespace WaypointManager
             ToolbarControl.LoadImageFromFile(ref Config.closeIcon, KSPUtil.ApplicationRootPath + "GameData/WaypointManager/PluginData/icons/close");
         }
 
+
         internal const string MODID = "WaypointManager";
         internal const string MODNAME = "Waypoint Manager";
 
         private void SetupToolbar()
         {
             toolbarControl = gameObject.AddComponent<ToolbarControl>();
-            toolbarControl.AddToAllToolbars(ToggleWindow, ToggleWindow,
+            toolbarControl.AddToAllToolbars(null, null,
                 ApplicationLauncher.AppScenes.FLIGHT |
                 ApplicationLauncher.AppScenes.MAPVIEW |
                 ApplicationLauncher.AppScenes.TRACKSTATION |
@@ -128,6 +133,7 @@ namespace WaypointManager
                 "WaypointManager/PluginData/icons/toolbarSmall",
                 MODNAME
             );
+            toolbarControl.AddLeftRightClickCallbacks(ToggleWindow, ToggleWindowRightClick);
         }
 
 
@@ -171,7 +177,6 @@ namespace WaypointManager
                 {
                     string config = configNode.GetValue("name");
 
-                    Log.Info("WaypointManager: Loading " + config + " icons.");
                     string url = configNode.GetValue("url");
                     if (url.Last() != '/')
                     {
@@ -218,6 +223,79 @@ namespace WaypointManager
             if (!showGUI)
             {
                 Config.Save();
+            }
+        }
+
+        class WaypointEnabledState
+        {
+            public Guid guid;
+            public bool enabled;
+        }
+
+        List<WaypointEnabledState> waypointList;
+
+        void HideAllWaypoints()
+        {
+            if (!hidden)
+            {
+                hidden = true;
+                toolbarControl.SetTexture("WaypointManager/PluginData/icons/toolbar-blue", "WaypointManager/PluginData/icons/toolbarSmall-blue");
+                waypointList = new List<WaypointEnabledState>();
+                foreach (Waypoint wp in FinePrint.WaypointManager.Instance().Waypoints)
+                {
+                    waypointList.Add(new WaypointEnabledState { guid = wp.navigationId, enabled = wp.visible });
+                    wp.visible = false;
+                }
+            }
+        }
+
+        void ShowAllWaypoints()
+        {
+            if (hidden)
+            {
+                hidden = false;
+                toolbarControl.SetTexture("WaypointManager/PluginData/icons/toolbar", "WaypointManager/PluginData/icons/toolbarSmall");
+                foreach (var wp in waypointList)
+                {
+                    FinePrint.WaypointManager.FindWaypoint(wp.guid).visible = wp.enabled;
+                }
+                waypointList.Clear();
+            }
+        }
+
+        private void ToggleWindowRightClick()
+        {
+            Log.Info("ToggleWindowRightClick called, rightClickEnabled: " + rightClickEnabled);
+            if (!rightClickEnabled)
+            {
+                return;
+            }
+            if (!hidden)
+            {
+                HideAllWaypoints();
+#if false
+                hidden = true;
+                toolbarControl.SetTexture("WaypointManager/PluginData/icons/toolbar-blue", "WaypointManager/PluginData/icons/toolbarSmall-blue");
+                waypointList = new List<WaypointEnabledState>();
+                foreach (Waypoint wp in FinePrint.WaypointManager.Instance().Waypoints)
+                {
+                    waypointList.Add(new WaypointEnabledState { guid = wp.navigationId, enabled = wp.visible });
+                    wp.visible = false;
+                }
+#endif
+            }
+            else
+            {
+                ShowAllWaypoints();
+#if false
+                hidden = false;
+                toolbarControl.SetTexture("WaypointManager/PluginData/icons/toolbar", "WaypointManager/PluginData/icons/toolbarSmall");
+                foreach (var wp in waypointList)
+                {
+                    FinePrint.WaypointManager.FindWaypoint(wp.guid).visible = wp.enabled;
+                }
+                waypointList.Clear();
+#endif
             }
         }
 
@@ -674,20 +752,51 @@ namespace WaypointManager
                         Config.Save();
                     }
                 }
-
-                using (new GUILayout.HorizontalScope())
+                if (kopernicusNodexExists)
                 {
-                    if (GUILayout.Button("Add all Kopernicus City2 nodes"))
+                    using (new GUILayout.HorizontalScope())
                     {
-                        WaypointData.AddKopernicusNodes();
+                        if (GUILayout.Button(kopernicusNodesAdded ? 
+                                                "Remove all Kopernicus City2 nodes" :
+                                                "Add all Kopernicus City2 nodes"))
+                        {
+                            if (kopernicusNodesAdded)
+                            {
+                                WaypointData.ClearKopernicusNodes();
+                            }
+                            else
+                            {
+                                WaypointData.AddKopernicusNodes();
+                            }
+                        }
+
+#if false
+                        if (!kopernicusNodesAdded)
+                        {
+                            if (GUILayout.Button("Add all Kopernicus City2 nodes"))
+                            {
+                                WaypointData.AddKopernicusNodes();
+                            }
+                        }
+                        else
+                        {
+                            if (GUILayout.Button("Remove all Kopernicus City2 nodes"))
+                            {
+                                WaypointData.ClearKopernicusNodes();
+                            }
+                        }
+#endif
                     }
                 }
-
                 using (new GUILayout.HorizontalScope())
                 {
-                    if (GUILayout.Button("Remove all Kopernicus City2 nodes"))
+                    if (GUILayout.Button(rightClickEnabled ?
+                                            "Disable right click to hide/show all waypoints" :
+                                            "Enable right click to hide/show all waypoints"
+                    ))
                     {
-                        WaypointData.ClearKopernicusNodes();
+                        rightClickEnabled = !rightClickEnabled;
+                        ShowAllWaypoints();
                     }
                 }
             }

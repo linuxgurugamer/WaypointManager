@@ -88,7 +88,7 @@ namespace WaypointManager
                 double lat = double.Parse(city.GetValue("lat"));
                 double lon = double.Parse(city.GetValue("lon"));
                 float alt = float.Parse(city.GetValue("alt"));
-                Log.Info("locname: " + locname + ", objectName: " + objectName + ", celestialName: " + FlightGlobals.GetHomeBodyName() + ", lat: " + lat + ", lon: " + lon + ", alt: " + alt);
+
                 Waypoint wp = new Waypoint();
 
                 wp.celestialName = FlightGlobals.GetHomeBodyName();
@@ -117,6 +117,8 @@ namespace WaypointManager
                 wp.enableMarker = true;
 
                 FinePrint.WaypointManager.AddWaypoint(wp);
+
+                WaypointManager.kopernicusNodesAdded = true;
             }
         }
 
@@ -131,6 +133,8 @@ namespace WaypointManager
                     FinePrint.WaypointManager.RemoveWaypoint(wp);
                 }
             }
+            WaypointManager.kopernicusNodesAdded = false;
+
         }
 
         private static void FindKopernicusNodes()

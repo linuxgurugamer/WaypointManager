@@ -1,13 +1,15 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using ClickThroughFix;
+using CommNet.Network;
 using FinePrint;
 using FinePrint.Utilities;
-using ClickThroughFix;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using ToolbarControl_NS;
+using UnityEngine;
+using static GameEvents;
 using static WaypointManager.RegisterToolbar;
 
 namespace WaypointManager
@@ -93,7 +95,7 @@ namespace WaypointManager
         private static bool showIconPicker = false;
         private static bool useTerrainHeight = false;
         private static bool recalcAltitude = false;
-        private static GUIContent[] icons = null;
+        internal static GUIContent[] icons = null;
         private static GUIContent[] colors = null;
 
         private static bool showExportDialog = false;
@@ -211,6 +213,17 @@ namespace WaypointManager
             expWindowPos = new Rect((Screen.width - expWindowPos.width) / 2.0f, (Screen.height - expWindowPos.height) / 2.0f, expWindowPos.width, expWindowPos.height);
         }
 
+        static string GetNameFromID(string str)
+        {
+            int lastDelimiterIndex = str.LastIndexOf('/');
+
+            // If the delimiter is found, extract everything after it; 
+            // otherwise, fallback to the entire string.
+            string lastField = lastDelimiterIndex != -1
+                ? str.Substring(lastDelimiterIndex + 1)
+                : str;
+            return lastField;
+        }
         public static void OnGUI()
         {
             // Initialize icon list
@@ -227,7 +240,19 @@ namespace WaypointManager
                         continue;
                     }
 
-                    content.Add(new GUIContent(ContractDefs.sprites[name].texture, name));
+                    // The old code was replaced because Squad loaded the texture into VRAM and it was not accessable via code.
+
+                    Texture2D icon = new Texture2D(2, 2);
+                    var filename = KSPUtil.ApplicationRootPath + "GameData/Squad/Contracts/Icons/" + name;
+                    var rc = ToolbarControl.LoadImageFromFile(ref icon, filename);
+                    if (!rc)
+                    {
+                        Log.Error("Failed to load icon: " + filename);
+                        continue;
+                    }
+
+                    //content.Add(new GUIContent(ContractDefs.sprites[name].texture, name));
+                    content.Add(new GUIContent(icon, name));
                 }
 
                 // Get all the directories for custom icons
@@ -239,9 +264,12 @@ namespace WaypointManager
                     {
                         foreach (var str in Directory.GetFiles(KSPUtil.ApplicationRootPath+"GameData/" + dir))
                         {
+                            var str2 = str.Replace("\\", "/");
                             var icon = new Texture2D(2, 2);
-                            ToolbarControl.LoadImageFromFile(ref icon, str);
-                            content.Add(new GUIContent(icon, str));
+                            ToolbarControl.LoadImageFromFile(ref icon, str2);
+                            string name = "icon/" + GetNameFromID(str2);
+                            name=name.Substring(0, name.LastIndexOf('.'));
+                            content.Add(new GUIContent(icon, name));
                         }
                     }
                 }
@@ -260,6 +288,11 @@ namespace WaypointManager
                 }
 
                 icons = content.ToArray();
+
+                //foreach (var i in icons)
+                //{
+                //    Log.Info("Icon: " + i.tooltip);
+                //}
             }
 
             // Initialize color list
@@ -579,7 +612,7 @@ namespace WaypointManager
         private static void IconPickerGUI(int windowID)
         {
             GUILayout.BeginVertical(GUILayout.Width(ICON_PICKER_WIDTH));
-            selectedIcon = GUILayout.SelectionGrid(selectedIcon, icons, 4);
+            selectedIcon = GUILayout.SelectionGrid(selectedIcon, icons, 4, GUILayout.Width(ICON_PICKER_WIDTH), GUILayout.Height(ICON_PICKER_WIDTH));
 
             GUILayout.BeginHorizontal();
             GUILayout.Space(4);
@@ -636,7 +669,7 @@ namespace WaypointManager
                 return;
             }
 
-            Ray mouseRay = PlanetariumCamera.Camera.ScreenPointToRay(Input.mousePosition);
+            Ray mouseRay = PlanetariumCamera.Camera.ScreenPointToRay(UnityEngine.Input.mousePosition);
             mouseRay.origin = ScaledSpace.ScaledToLocalSpace(mouseRay.origin);
             var bodyToOrigin = mouseRay.origin - targetBody.position;
             double curRadius = targetBody.pqsController.radiusMax;

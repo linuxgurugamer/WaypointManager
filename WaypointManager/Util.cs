@@ -1,13 +1,11 @@
-﻿using System;
+﻿using DDSHeaders;
+using FinePrint;
+using FinePrint.Utilities;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using UnityEngine;
-using FinePrint;
-using FinePrint.Utilities;
-using DDSHeaders;
-using ToolbarControl_NS;
 using static WaypointManager.RegisterToolbar;
 
 namespace WaypointManager
@@ -185,6 +183,46 @@ namespace WaypointManager
 
             if (!contractIcons[key].ContainsKey(color))
             {
+                //Log.Info("GetContractIcon 2");
+                Texture2D loadedTexture = null;
+                if (CustomWaypointGUI.icons != null && CustomWaypointGUI.icons.Length > 0)
+                {
+                    int selectedIcon = Array.FindIndex(CustomWaypointGUI.icons,
+                         icon => icon != null && icon.tooltip == url);
+
+                    if (selectedIcon >= 0)
+                    {
+                        loadedTexture = CustomWaypointGUI.icons[selectedIcon].image as Texture2D;
+#if true
+                        return loadedTexture;
+#else
+                        Color[] pixels = loadedTexture.GetPixels();
+                        for (int i = 0; i < pixels.Length; i++)
+                        {
+                            pixels[i] *= color;
+                        }
+                        //texture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
+                        texture = new Texture2D(loadedTexture.width, loadedTexture.height, TextureFormat.RGBA32, false);
+                        texture.SetPixels(pixels);
+                        texture.Apply(false, false);
+                        contractIcons[key][color] = texture;
+
+                        //UnityEngine.Object.Destroy(loadedTexture);
+
+                        return texture;
+#endif
+                    }
+                    else
+                    {
+                        Log.Info("GetContractIcon 5");
+                        foreach (var i in CustomWaypointGUI.icons)
+                        {
+                            Log.Info("Icon: " + i.tooltip);
+                        }
+
+                        Log.Info("Loading stock icon texture from '" + url + "'");
+                    }
+                }
 
                 if (url.EndsWith(".png"))
                     url = url.Substring(0, url.Length - 4);
@@ -197,6 +235,7 @@ namespace WaypointManager
                 string url2 = url;
 
                 string tmp = url;
+                //Log.Info("GetContractIcon, url: " + url);
                 if (!tmp.Contains("PluginData"))
                 {
                     if (!url.StartsWith("GameData"))
@@ -225,16 +264,17 @@ namespace WaypointManager
                 if (path.EndsWith(".png") || path.EndsWith(".dds"))
                     path = path.Substring(0, path.Length - 4);
 
+
                 try
                 {
-                    Texture2D loadedTexture = null;
 
                     // PNG loading
+                    //Log.Info("Loading icon texture from '" + path + ".png'");
                     if (File.Exists(path + ".png"))
                     {
                         path += ".png";
                         loadedTexture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
-                        loadedTexture.LoadImage(File.ReadAllBytes(path.Replace('/', Path.DirectorySeparatorChar)));             
+                        loadedTexture.LoadImage(File.ReadAllBytes(path.Replace('/', Path.DirectorySeparatorChar)));
                     }
                     // DDS loading
                     else

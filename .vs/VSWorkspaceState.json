@@ -1,7 +1,8 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\WaypointManager"
   ],
-  "SelectedNode": "\\WaypointManager.sln",
+  "SelectedNode": "\\WaypointManager\\WaypointManager.cs",
   "PreviewInSolutionExplorer": false
 }

@@ -1,5 +1,14 @@
 Changelog
 
+2.8.5 (unreleased)
+	From github user @clayell:
+		Added support for Kopernicus City2 waypoints
+	Added code to show the Kopernicus buttons only when available
+	Added new right-click to the toolbar button to show/hide all waypoints
+	Added new button to settings to disable/enable the right-click menu on the toolbar button
+	Updated code to show correct version number in title bar
+	Fixed issue with selecting icons for custom waypoints, now shows the correct icon in the selection window, was getting an exception and not showing the selection window
+
 2.8.4.8 
 	Thanks to github user @Clayell for this:
 		hide toolbar button in mainmenu
