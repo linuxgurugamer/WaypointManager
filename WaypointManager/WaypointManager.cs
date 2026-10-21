@@ -125,8 +125,7 @@ namespace WaypointManager
             toolbarControl.AddToAllToolbars(null, null,
                 ApplicationLauncher.AppScenes.FLIGHT |
                 ApplicationLauncher.AppScenes.MAPVIEW |
-                ApplicationLauncher.AppScenes.TRACKSTATION |
-                ~ApplicationLauncher.AppScenes.MAINMENU,
+                ApplicationLauncher.AppScenes.TRACKSTATION,
                 MODID,
                 "waypointMgr",
                 "WaypointManager/PluginData/icons/toolbar",

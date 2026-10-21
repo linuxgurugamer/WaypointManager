@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using FinePrint;
+using System;
 using System.IO;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-using KSP;
-using FinePrint;
+
+using static WaypointManager.RegisterToolbar;
 
 namespace WaypointManager
 {
@@ -61,6 +59,7 @@ namespace WaypointManager
 
             waypoint.seed = seed;
             waypoint.id = id;
+            Log.Info("id 5: " + waypoint.id);
             waypoint.altitude = altitude;
 
             waypoint.index = Instance.nextIndex++;
@@ -98,6 +97,7 @@ namespace WaypointManager
             if (node.HasValue("icon"))
             {
                 waypoint.id = node.GetValue("icon");
+                Log.Info("id 6: " + waypoint.id);
             }
             if (node.HasValue("altitude"))
             {

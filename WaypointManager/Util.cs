@@ -171,7 +171,7 @@ namespace WaypointManager
         {
             string key = url;
             if (url == "dish")
-                url = "marker";
+                url = "icon/marker";
 
             // Check cache for texture
             Texture2D texture;
@@ -320,7 +320,12 @@ namespace WaypointManager
                         }
                         else
                         {
-                            throw new Exception("Couldn't find file for icon  '" + url + "'");
+                            //throw new Exception("Couldn't find file for icon  '" + url + "'");
+
+                            Log.Error("Couldn't find file for icon: '" + url + "'.  Returning default marker");
+                            
+                            return GetContractIcon("icon/marker", seed);
+
                         }
                     }
 
@@ -342,6 +347,8 @@ namespace WaypointManager
                     Log.Error("WaypointManager: Couldn't create texture for '" + url + "'!");
                     Log.Error("key: " + key);
                     Log.Error("path: " + path);
+                    string stackTrace = StackTraceUtility.ExtractStackTrace();
+                    Log.Error(stackTrace);
                     Debug.LogException(e);
                     texture = contractIcons[key][color] = baseTexture;
                 }
@@ -419,6 +426,7 @@ namespace WaypointManager
             Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, 0.5f * (alpha - 0.3f) / 0.7f));
 
             // Draw the icon
+            Log.Info("icon, id: " + id + ", seed: " + seed);
             Graphics.DrawTexture(iconRect, /* ContractDefs.sprites[id].texture */
                 GetContractIcon(id, seed), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(seed, alpha));
         }

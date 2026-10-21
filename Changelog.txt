@@ -9,6 +9,8 @@ Changelog
 	Updated code to show correct version number in title bar
 	Fixed issue with selecting icons for custom waypoints, now shows the correct icon in the selection window, was getting an exception and not showing the selection window
 	Fixed issue with grouped waypoints on other planets not being shown
+	Removed toolbar icon from MainMenu, which was also putting it on the Space Center toolbar
+	Added default marker in case a bad icon path is loaded
 
 2.8.4.8 
 	Thanks to github user @Clayell for this:

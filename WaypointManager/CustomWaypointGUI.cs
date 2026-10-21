@@ -166,6 +166,8 @@ namespace WaypointManager
             selectedColor = (int)(r.NextDouble() * seeds.Count());
             template.id = icons[selectedIcon].tooltip;
             template.seed = seeds[selectedColor];
+
+            Log.Info("id 1: " + template.id);
         }
 
         /// <summary>
@@ -191,6 +193,7 @@ namespace WaypointManager
             altitude = (waypoint.altitude + Util.WaypointHeight(waypoint, targetBody)).ToString();
             template.id = waypoint.id;
             template.seed = waypoint.seed;
+            Log.Info("id 2: " + template.id);
         }
 
         /// <summary>
@@ -247,7 +250,7 @@ namespace WaypointManager
                     var rc = ToolbarControl.LoadImageFromFile(ref icon, filename);
                     if (!rc)
                     {
-                        Log.Error("Failed to load icon: " + filename);
+                        Log.Info("Failed to load icon: " + filename);
                         continue;
                     }
 
@@ -501,7 +504,8 @@ namespace WaypointManager
             {
                 showIconPicker = !showIconPicker;
 
-                selectedIcon = Array.IndexOf(icons, icons.Where(c => c.tooltip == template.id).First());
+                selectedIcon = Array.IndexOf(icons, icons.Where(c => c.tooltip == template.id));
+                //selectedIcon = Array.IndexOf(icons, icons.Where(c => c.tooltip == template.id).First());
                 selectedColor = Array.IndexOf(seeds, template.seed);
                 if (selectedIcon == -1)
                 {
@@ -578,6 +582,7 @@ namespace WaypointManager
                 else
                 {
                     selectedWaypoint.id = template.id;
+                    Log.Info("id 3: " + template.id);
                     selectedWaypoint.name = template.name;
                     selectedWaypoint.latitude = template.latitude;
                     selectedWaypoint.longitude = template.longitude;
@@ -635,6 +640,7 @@ namespace WaypointManager
             {
                 showIconPicker = false;
                 template.id = icons[selectedIcon].tooltip;
+                Log.Info("id 4: " + template.id);
                 template.seed = seeds[selectedColor];
             }
             if (GUILayout.Button("Cancel"))
