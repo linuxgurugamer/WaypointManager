@@ -102,7 +102,7 @@ namespace WaypointManager
                 wp.index = 1;
 
                 wp.name = objectName;
-                wp.id = "marker";
+                wp.id = "icon/marker";
                 if (locname.Contains("TrackingStation") || locname.Contains("Tracking Station"))
                     wp.id = "dish";
                 if (locname.Contains("Elevation"))

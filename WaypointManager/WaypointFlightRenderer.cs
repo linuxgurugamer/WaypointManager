@@ -47,14 +47,34 @@ namespace WaypointManager
             GameEvents.onGameSceneLoadRequested.Add(new EventData<GameScenes>.OnEvent(OnGameSceneLoadRequested));
             GameEvents.onHideUI.Add(new EventVoid.OnEvent(OnHideUI));
             GameEvents.onShowUI.Add(new EventVoid.OnEvent(OnShowUI));
+
+            Instance = this;
         }
 
+        static WaypointFlightRenderer Instance;
         protected void OnDestroy()
         {
             GameEvents.onGameSceneLoadRequested.Remove(new EventData<GameScenes>.OnEvent(OnGameSceneLoadRequested));
             GameEvents.onHideUI.Remove(OnHideUI);
             GameEvents.onShowUI.Remove(OnShowUI);
         }
+
+        static void OnHotUnload(MonoBehaviour newObject)
+        {
+            //Debug.Log("[WaypointManager] WaypointFlightRenderer.OnHotUnload");
+            GameEvents.onGameSceneLoadRequested.Remove(new EventData<GameScenes>.OnEvent(Instance.OnGameSceneLoadRequested));
+            GameEvents.onHideUI.Remove(Instance.OnHideUI);
+            GameEvents.onShowUI.Remove(Instance.OnShowUI);
+
+            GameEvents.onGameSceneLoadRequested.Add(new EventData<GameScenes>.OnEvent(((WaypointFlightRenderer)newObject).OnGameSceneLoadRequested));
+            GameEvents.onHideUI.Add(((WaypointFlightRenderer)newObject).OnHideUI);
+            GameEvents.onShowUI.Add(((WaypointFlightRenderer)newObject).OnShowUI);
+
+        }
+        static void OnHotLoad()
+        {
+        }
+
 
         public void OnGameSceneLoadRequested(GameScenes gameScene)
         {
@@ -119,33 +139,36 @@ namespace WaypointManager
 
         public void OnGUI()
         {
-            if (visible && !ImportExport.helpDialogVisible)
+            if (HighLogic.LoadedScene == GameScenes.FLIGHT || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
             {
-                if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+                if (visible && !ImportExport.helpDialogVisible)
                 {
-                    newClick = true;
-                }
-
-                if (HighLogic.LoadedScene == GameScenes.FLIGHT || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-                {
-                    // Draw the marker for custom waypoints that are currently being created
-                    CustomWaypointGUI.DrawMarker();
-                }
-
-                if (HighLogic.LoadedSceneIsFlight && !MapView.MapIsEnabled)
-                {
-                    WaypointData.CacheWaypointData();
-
-                    foreach (WaypointData wpd in WaypointData.Waypoints)
+                    if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
                     {
-                        DrawWaypoint(wpd);
+                        newClick = true;
                     }
-                }
-                else cnt = 0;
 
-                if (HighLogic.LoadedSceneIsFlight && (!MapView.MapIsEnabled || ContractSystem.Instance == null))
-                {
-                    ShowNavigationWindow();
+                    if (HighLogic.LoadedScene == GameScenes.FLIGHT || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+                    {
+                        // Draw the marker for custom waypoints that are currently being created
+                        CustomWaypointGUI.DrawMarker();
+                    }
+
+                    if (HighLogic.LoadedSceneIsFlight && !MapView.MapIsEnabled)
+                    {
+                        WaypointData.CacheWaypointData();
+
+                        foreach (WaypointData wpd in WaypointData.Waypoints)
+                        {
+                            DrawWaypoint(wpd);
+                        }
+                    }
+                    else cnt = 0;
+
+                    if (HighLogic.LoadedSceneIsFlight && (!MapView.MapIsEnabled || ContractSystem.Instance == null))
+                    {
+                        ShowNavigationWindow();
+                    }
                 }
             }
         }
@@ -394,7 +417,7 @@ namespace WaypointManager
                 // Draw the icon, but support blinking
                 if (!Util.IsNavPoint(wpd.waypoint) || !NavWaypoint.fetch.IsBlinking || (int)((Time.fixedTime - (int)Time.fixedTime) * 4) % 2 == 0)
                 {
-                    Log.Info("DrawWaypoint, id: " + wpd.waypoint.id + ", seed: " + wpd.waypoint.seed);
+                    //Log.Info("DrawWaypoint, id: " + wpd.waypoint.id + ", seed: " + wpd.waypoint.seed);
                     Graphics.DrawTexture(iconRect, /*ContractDefs.sprites[wpd.waypoint.id].texture */
                         Util.GetContractIcon(wpd.waypoint.id, wpd.waypoint.seed), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(wpd.waypoint.seed, wpd.currentAlpha));
                 }

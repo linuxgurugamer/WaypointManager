@@ -11,6 +11,12 @@ Changelog
 	Fixed issue with grouped waypoints on other planets not being shown
 	Removed toolbar icon from MainMenu, which was also putting it on the Space Center toolbar
 	Added default marker in case a bad icon path is loaded
+	Fixed issue with Kopernicus City2 markers having the wrong name for the marker
+	Removed old code loading dds or png, replaced with ToolbarControl.LoadImageFromFile()
+	Added code to only use marker icons for picking a marker for a waypoint (also will include the toolbar-blue)
+	Added a white marker so color change will work properly
+	Added code to not apply color changes to colored markers
+	For development, added code to support the HotReload mod
 
 2.8.4.8 
 	Thanks to github user @Clayell for this:

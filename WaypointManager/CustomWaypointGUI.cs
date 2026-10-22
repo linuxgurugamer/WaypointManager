@@ -193,7 +193,6 @@ namespace WaypointManager
             altitude = (waypoint.altitude + Util.WaypointHeight(waypoint, targetBody)).ToString();
             template.id = waypoint.id;
             template.seed = waypoint.seed;
-            Log.Info("id 2: " + template.id);
         }
 
         /// <summary>
@@ -267,12 +266,15 @@ namespace WaypointManager
                     {
                         foreach (var str in Directory.GetFiles(KSPUtil.ApplicationRootPath+"GameData/" + dir))
                         {
-                            var str2 = str.Replace("\\", "/");
-                            var icon = new Texture2D(2, 2);
-                            ToolbarControl.LoadImageFromFile(ref icon, str2);
-                            string name = "icon/" + GetNameFromID(str2);
-                            name=name.Substring(0, name.LastIndexOf('.'));
-                            content.Add(new GUIContent(icon, name));
+                            if (str.Contains("marker") || str.Contains("toolbar-blue"))
+                            {
+                                var str2 = str.Replace("\\", "/");
+                                var icon = new Texture2D(2, 2);
+                                ToolbarControl.LoadImageFromFile(ref icon, str2);
+                                string name = "icon/" + GetNameFromID(str2);
+                                name = name.Substring(0, name.LastIndexOf('.'));
+                                content.Add(new GUIContent(icon, name));
+                            }
                         }
                     }
                 }

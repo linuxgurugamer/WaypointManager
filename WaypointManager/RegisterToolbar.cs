@@ -14,6 +14,7 @@ namespace WaypointManager
             ToolbarControl.RegisterMod(WaypointManager.MODID, WaypointManager.MODNAME);
 #if DEBUG
             Log = new Log("WaypointManager", Log.LEVEL.INFO);
+            DontDestroyOnLoad(this);
 #else
             Log = new Log("WaypointManager", Log.LEVEL.ERROR);
 #endif
@@ -33,5 +34,14 @@ namespace WaypointManager
 
             }
         }
+
+        static void OnHotUnload(MonoBehaviour newObject)
+        {
+            ((RegisterToolbar)newObject).Start();
+            //Debug.Log("[WaypointManager] RegisterToolbar.OnHotUnload");
+
+            WaypointFlightRenderer.SetupStyles();
+        }
+
     }
 }

@@ -18,6 +18,8 @@ set VERSIONFILE=%GAMEDIR%.version
 
 set DP0=r:\dp0\kspdev
 
+del /q "%H%\GameData\%GAMEDIR%\Plugins\"
+
 copy /Y "%1%2" "%GAMEDATA%\%GAMEDIR%\Plugins"
 copy /Y "%1%3".pdb "%GAMEDATA%\%GAMEDIR%\Plugins"
 

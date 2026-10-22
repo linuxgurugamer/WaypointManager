@@ -1,10 +1,9 @@
-﻿using DDSHeaders;
-using FinePrint;
+﻿using FinePrint;
 using FinePrint.Utilities;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using ToolbarControl_NS;
 using UnityEngine;
 using static WaypointManager.RegisterToolbar;
 
@@ -170,15 +169,24 @@ namespace WaypointManager
         public static Texture2D GetContractIcon(string url, int seed)
         {
             string key = url;
+#if false
             if (url == "dish")
-                url = "icon/marker";
-
+            {
+                Log.Info("URL is dish: " + url);
+                //url = "icon/marker";
+                //url = "dish";
+            }
+#endif
             // Check cache for texture
-            Texture2D texture;
+            Texture2D texture = null;
             Color color = SystemUtilities.RandomColor(seed, 1.0f, 1.0f, 1.0f);
             if (!contractIcons.ContainsKey(key))
             {
                 contractIcons[key] = new Dictionary<Color, Texture2D>();
+
+                Log.Info("WaypointManager icon, url: " + url);
+                string stackTrace = StackTraceUtility.ExtractStackTrace();
+                Log.Warning(stackTrace);
             }
 
             if (!contractIcons[key].ContainsKey(color))
@@ -193,27 +201,29 @@ namespace WaypointManager
                     if (selectedIcon >= 0)
                     {
                         loadedTexture = CustomWaypointGUI.icons[selectedIcon].image as Texture2D;
-#if true
-                        return loadedTexture;
-#else
-                        Color[] pixels = loadedTexture.GetPixels();
-                        for (int i = 0; i < pixels.Length; i++)
+                        // Code to exclude colored markers from the PluginData/icons, but
+                        // to include the white marker
+                        if (!key.Contains("marker_") && !key.Contains("toolbar-blue") || key.Contains("marker_white"))
                         {
-                            pixels[i] *= color;
+                            Color[] pixels = loadedTexture.GetPixels();
+                            for (int i = 0; i < pixels.Length; i++)
+                            {
+                                pixels[i] *= color;
+                            }
+                            //texture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
+                            texture = new Texture2D(loadedTexture.width, loadedTexture.height, TextureFormat.RGBA32, false);
+                            texture.SetPixels(pixels);
+                            texture.Apply(false, false);
+                            contractIcons[key][color] = texture;
+                            return texture;
                         }
-                        //texture = new Texture2D(baseTexture.width, baseTexture.height, TextureFormat.RGBA32, false);
-                        texture = new Texture2D(loadedTexture.width, loadedTexture.height, TextureFormat.RGBA32, false);
-                        texture.SetPixels(pixels);
-                        texture.Apply(false, false);
-                        contractIcons[key][color] = texture;
-
+                        else
+                            return loadedTexture;
                         //UnityEngine.Object.Destroy(loadedTexture);
-
-                        return texture;
-#endif
                     }
                     else
                     {
+#if false
                         Log.Info("GetContractIcon 5");
                         foreach (var i in CustomWaypointGUI.icons)
                         {
@@ -221,6 +231,7 @@ namespace WaypointManager
                         }
 
                         Log.Info("Loading stock icon texture from '" + url + "'");
+#endif
                     }
                 }
 
@@ -229,7 +240,7 @@ namespace WaypointManager
                 if (url.StartsWith("GameData"))
                     url = url.Substring(9);
 
-                Texture2D baseTexture = ContractDefs.sprites[url].texture;
+                // Texture2D baseTexture = ContractDefs.sprites[url].texture;
 
                 url = url.Replace('\\', '/');
                 string url2 = url;
@@ -264,12 +275,26 @@ namespace WaypointManager
                 if (path.EndsWith(".png") || path.EndsWith(".dds"))
                     path = path.Substring(0, path.Length - 4);
 
+                if (!ToolbarControl.LoadImageFromFile(ref loadedTexture, KSPUtil.ApplicationRootPath + path))
+                {
+                    Log.Error("WaypointManager: Couldn't create texture for '" + url + "'!");
+                    Log.Error("key: " + key);
+                    Log.Error("path: " + path);
 
+                    string stackTrace = StackTraceUtility.ExtractStackTrace();
+                    Log.Error(stackTrace);
+                    //texture = contractIcons[key][color] = baseTexture;
+
+                    return GetContractIcon("icon/marker", seed);
+                }
+
+
+#if false
                 try
                 {
 
                     // PNG loading
-                    //Log.Info("Loading icon texture from '" + path + ".png'");
+                    Log.Info("Loading icon texture from '" + path + ".png'");
                     if (File.Exists(path + ".png"))
                     {
                         path += ".png";
@@ -352,6 +377,7 @@ namespace WaypointManager
                     Debug.LogException(e);
                     texture = contractIcons[key][color] = baseTexture;
                 }
+#endif
             }
             else
             {
@@ -426,7 +452,7 @@ namespace WaypointManager
             Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, 0.5f * (alpha - 0.3f) / 0.7f));
 
             // Draw the icon
-            Log.Info("icon, id: " + id + ", seed: " + seed);
+            //Log.Info("icon, id: " + id + ", seed: " + seed);
             Graphics.DrawTexture(iconRect, /* ContractDefs.sprites[id].texture */
                 GetContractIcon(id, seed), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, SystemUtilities.RandomColor(seed, alpha));
         }

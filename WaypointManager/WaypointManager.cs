@@ -26,7 +26,7 @@ namespace WaypointManager
 
         public static WaypointManager Instance;
 
-        ToolbarControl toolbarControl;
+        static ToolbarControl toolbarControl = null;
 
         private static bool initialized = false;
         public bool showGUI = false;
@@ -57,6 +57,8 @@ namespace WaypointManager
         void Start()
         {
             DontDestroyOnLoad(this);
+            if (toolbarControl == null)
+                SetupToolbar();
 
             if (!initialized)
             {
@@ -91,11 +93,31 @@ namespace WaypointManager
             GameEvents.onHideUI.Remove(OnHideUI);
             GameEvents.onShowUI.Remove(OnShowUI);
             GameEvents.onPlanetariumTargetChanged.Remove(new EventData<MapObject>.OnEvent(PlanetariumTargetChanged));
+            GameEvents.onGameSceneLoadRequested.Remove(new EventData<GameScenes>.OnEvent(OnGameSceneLoad));
 
             //
             //UnloadToolbar();
-            TeardownToolbar();
+            //TeardownToolbar();
             Config.Save();
+        }
+
+
+        static void OnHotUnload(MonoBehaviour newObject)
+        {
+            //Debug.Log("[WaypointManager] WaypointManager.OnHotUnload");
+            GameEvents.onHideUI.Remove(Instance.OnHideUI);
+            GameEvents.onShowUI.Remove(Instance.OnShowUI);
+            GameEvents.onPlanetariumTargetChanged.Remove(new EventData<MapObject>.OnEvent(Instance.PlanetariumTargetChanged));
+            GameEvents.onGameSceneLoadRequested.Remove(new EventData<GameScenes>.OnEvent(Instance.OnGameSceneLoad));
+
+            GameEvents.onGameSceneLoadRequested.Add(new EventData<GameScenes>.OnEvent(((WaypointManager)newObject).OnGameSceneLoad));
+            GameEvents.onHideUI.Add(new EventVoid.OnEvent(((WaypointManager)newObject).OnHideUI));
+            GameEvents.onShowUI.Add(new EventVoid.OnEvent(((WaypointManager)newObject).OnShowUI));
+            GameEvents.onPlanetariumTargetChanged.Add(new EventData<MapObject>.OnEvent(((WaypointManager)newObject).PlanetariumTargetChanged));
+
+        }
+        static void OnHotLoad()
+        {
         }
 
         private void LoadTextures()
@@ -121,22 +143,25 @@ namespace WaypointManager
 
         private void SetupToolbar()
         {
-            toolbarControl = gameObject.AddComponent<ToolbarControl>();
-            toolbarControl.AddToAllToolbars(null, null,
-                ApplicationLauncher.AppScenes.FLIGHT |
-                ApplicationLauncher.AppScenes.MAPVIEW |
-                ApplicationLauncher.AppScenes.TRACKSTATION,
-                MODID,
-                "waypointMgr",
-                "WaypointManager/PluginData/icons/toolbar",
-                "WaypointManager/PluginData/icons/toolbarSmall",
-                MODNAME
-            );
-            toolbarControl.AddLeftRightClickCallbacks(ToggleWindow, ToggleWindowRightClick);
+            if (toolbarControl == null)
+            {
+                toolbarControl = gameObject.AddComponent<ToolbarControl>();
+                toolbarControl.AddToAllToolbars(null, null,
+                    ApplicationLauncher.AppScenes.FLIGHT |
+                    ApplicationLauncher.AppScenes.MAPVIEW |
+                    ApplicationLauncher.AppScenes.TRACKSTATION,
+                    MODID,
+                    "waypointMgr",
+                    "WaypointManager/PluginData/icons/toolbar",
+                    "WaypointManager/PluginData/icons/toolbarSmall",
+                    MODNAME
+                );
+                toolbarControl.AddLeftRightClickCallbacks(ToggleWindow, ToggleWindowRightClick);
+            }
         }
 
 
-
+#if false
         private void TeardownToolbar()
         {
             if (toolbarControl != null)
@@ -144,8 +169,8 @@ namespace WaypointManager
                 toolbarControl.OnDestroy();
                 Destroy(toolbarControl);
             }
-
         }
+#endif
 
         private void OnGameSceneLoad(GameScenes scene)
         {

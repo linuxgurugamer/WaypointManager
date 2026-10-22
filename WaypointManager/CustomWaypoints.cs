@@ -43,7 +43,26 @@ namespace WaypointManager
             DontDestroyOnLoad(this);
             GameEvents.onCustomWaypointLoad.Add(OnCustomWaypointLoad);
             GameEvents.onCustomWaypointSave.Add(OnCustomWaypointSave);
+            //Debug.Log("[WaypointManager] CustomWaypoint.Awake");
         }
+        #region HotReload
+        static void OnHotUnload(MonoBehaviour newObject)
+        {
+            //Debug.Log("[WaypointManager] CustomWaypoints.OnHotUnload");
+            GameEvents.onCustomWaypointLoad.Remove(Instance.OnCustomWaypointLoad);
+            GameEvents.onCustomWaypointSave.Remove(Instance.OnCustomWaypointSave);
+
+            //GameEvents.onCustomWaypointLoad.Add(((CustomWaypoints)newObject).OnCustomWaypointLoad);
+            //GameEvents.onCustomWaypointSave.Add(((CustomWaypoints)newObject).OnCustomWaypointSave);
+        }
+
+
+        static void OnHotLoad(MonoBehaviour oldObject)
+        {
+            
+            //DontDestroyOnLoad(Instance);
+        }
+        #endregion
 
         /// <summary>
         /// Adds the waypoint to the custom waypoint list.
