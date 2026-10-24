@@ -71,7 +71,7 @@ namespace WaypointManager
                 LoadTextures();
                 LoadConfiguration();
                 // LoadToolbar();
-                SetupToolbar();
+                //SetupToolbar();
                 GameEvents.onGameSceneLoadRequested.Add(new EventData<GameScenes>.OnEvent(OnGameSceneLoad));
                 GameEvents.onHideUI.Add(new EventVoid.OnEvent(OnHideUI));
                 GameEvents.onShowUI.Add(new EventVoid.OnEvent(OnShowUI));
@@ -118,6 +118,7 @@ namespace WaypointManager
         }
         static void OnHotLoad()
         {
+            TeardownToolbar();
         }
 
         private void LoadTextures()
@@ -161,13 +162,14 @@ namespace WaypointManager
         }
 
 
-#if false
-        private void TeardownToolbar()
+#if true
+        private static void TeardownToolbar()
         {
             if (toolbarControl != null)
             {
                 toolbarControl.OnDestroy();
                 Destroy(toolbarControl);
+                toolbarControl = null;
             }
         }
 #endif
@@ -333,14 +335,8 @@ namespace WaypointManager
             visible = true;
         }
 
-        void OnGUI()
+        private void SetupStyles()
         {
-            // Build the cache of waypoint data
-            if (Event.current.type == EventType.Layout)
-            {
-                WaypointData.CacheWaypointData();
-            }
-
             if (!stylesSetup)
             {
                 // Set up the label style
@@ -364,6 +360,17 @@ namespace WaypointManager
 
                 stylesSetup = true;
             }
+        }
+
+        void OnGUI()
+        {
+            // Build the cache of waypoint data
+            if (Event.current.type == EventType.Layout)
+            {
+                WaypointData.CacheWaypointData();
+            }
+
+            SetupStyles();
 
             GUI.depth = 0;
 

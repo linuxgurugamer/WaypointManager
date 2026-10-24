@@ -169,6 +169,13 @@ namespace WaypointManager
         public static Texture2D GetContractIcon(string url, int seed)
         {
             string key = url;
+            if (key.Contains("Transfer"))
+            {
+                Log.Info("WaypointManager icon, URL contains Transfer...., url: " + url);
+                string stackTrace = StackTraceUtility.ExtractStackTrace();
+                Log.Warning(stackTrace);
+
+            }
 #if false
             if (url == "dish")
             {
@@ -201,6 +208,7 @@ namespace WaypointManager
                     if (selectedIcon >= 0)
                     {
                         loadedTexture = CustomWaypointGUI.icons[selectedIcon].image as Texture2D;
+
                         // Code to exclude colored markers from the PluginData/icons, but
                         // to include the white marker
                         if (!key.Contains("marker_") && !key.Contains("toolbar-blue") || key.Contains("marker_white"))
@@ -259,6 +267,7 @@ namespace WaypointManager
                             if (GameDatabase.Instance.databaseTexture[i].name.EndsWith(tmp) ||
                                 GameDatabase.Instance.databaseTexture[i].name == url)
                             {
+                                Log.Info("GetContractIcon, Loading texture from database, url: "  + GameDatabase.Instance.databaseTexture[i].file.fullPath);
                                 url2 = GameDatabase.Instance.databaseTexture[i].file.fullPath;
                             }
                         }
@@ -285,6 +294,8 @@ namespace WaypointManager
                     Log.Error(stackTrace);
                     //texture = contractIcons[key][color] = baseTexture;
 
+                    Log.Info("GetContractIcon, path: " + KSPUtil.ApplicationRootPath + path);
+                         
                     return GetContractIcon("icon/marker", seed);
                 }
 

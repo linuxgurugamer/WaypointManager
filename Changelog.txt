@@ -17,6 +17,7 @@ Changelog
 	Added a white marker so color change will work properly
 	Added code to not apply color changes to colored markers
 	For development, added code to support the HotReload mod
+	Fixed issue where opening the Add/Del Waypoint window in the Tracking Station and then going back to the Space Center without closing the windows would see the windows remain open
 
 2.8.4.8 
 	Thanks to github user @Clayell for this:

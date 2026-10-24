@@ -89,7 +89,9 @@ namespace WaypointManager
                 double lon = double.Parse(city.GetValue("lon"));
                 float alt = float.Parse(city.GetValue("alt"));
 
-                Waypoint wp = new Waypoint();
+                // Waypoint wp = new Waypoint();
+                Waypoint wp = CustomWaypointGUI.InitWaypoint();
+
 
                 wp.celestialName = FlightGlobals.GetHomeBodyName();
                 wp.latitude = lat;

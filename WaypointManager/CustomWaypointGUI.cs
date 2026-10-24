@@ -1,30 +1,39 @@
 ﻿using ClickThroughFix;
-using CommNet.Network;
 using FinePrint;
 using FinePrint.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using ToolbarControl_NS;
 using UnityEngine;
-using static GameEvents;
 using static WaypointManager.RegisterToolbar;
 
 namespace WaypointManager
 {
     public static class CustomWaypointGUI
     {
+        static CustomWaypointGUI()
+        {
+            template = InitWaypoint();
+        }
+
+        internal static Waypoint InitWaypoint()
+        {
+            var template = new Waypoint();
+            template.id = "icon/marker";
+            return template;
+        }
+
         // List of icons we don't want to look at in the Squad directory
         public static string[] forbiddenIcons = new string[] {
-            "an", "ap", "default", "dn", "marker", "orbit", "pe", "vessel"
+            "an", "ap", "default", "dn", /* "marker", */ "orbit", "pe", "vessel"
         };
 
         public static List<string> customIcons = new List<string>();
 
         internal const float ICON_PICKER_WIDTH = 302;
-        private enum WindowMode
+        internal enum WindowMode
         {
             None,
             Add,
@@ -85,8 +94,8 @@ namespace WaypointManager
         private static Rect wpWindowPos = new Rect(116f, 131f, 264f, 152f);
         private static Rect rmWindowPos = new Rect(116f, 131f, 280f, 80f);
         private static Rect expWindowPos = new Rect(116f, 131f, 280f, 80f);
-        private static WindowMode windowMode = WindowMode.None;
-        private static Waypoint template = new Waypoint();
+        internal static WindowMode windowMode = WindowMode.None;
+        private static Waypoint template; // Now initialized in the instantiator    = new Waypoint();
         private static string latitude;
         private static string longitude;
         private static string altitude;
@@ -226,9 +235,9 @@ namespace WaypointManager
                 : str;
             return lastField;
         }
-        public static void OnGUI()
+
+        public static void InitIcons()
         {
-            // Initialize icon list
             if (icons == null)
             {
                 List<GUIContent> content = new List<GUIContent>();
@@ -255,6 +264,7 @@ namespace WaypointManager
 
                     //content.Add(new GUIContent(ContractDefs.sprites[name].texture, name));
                     content.Add(new GUIContent(icon, name));
+                    Log.Info("InitIcons 1, adding: " + name);
                 }
 
                 // Get all the directories for custom icons
@@ -262,9 +272,9 @@ namespace WaypointManager
                 foreach (ConfigNode configNode in iconConfig)
                 {
                     string dir = configNode.GetValue("url");
-                    if (Directory.Exists(KSPUtil.ApplicationRootPath+"GameData/" + dir))
+                    if (Directory.Exists(KSPUtil.ApplicationRootPath + "GameData/" + dir))
                     {
-                        foreach (var str in Directory.GetFiles(KSPUtil.ApplicationRootPath+"GameData/" + dir))
+                        foreach (var str in Directory.GetFiles(KSPUtil.ApplicationRootPath + "GameData/" + dir))
                         {
                             if (str.Contains("marker") || str.Contains("toolbar-blue"))
                             {
@@ -274,6 +284,7 @@ namespace WaypointManager
                                 string name = "icon/" + GetNameFromID(str2);
                                 name = name.Substring(0, name.LastIndexOf('.'));
                                 content.Add(new GUIContent(icon, name));
+                                Log.Info("InitIcons 2, adding: " + name);
                             }
                         }
                     }
@@ -287,6 +298,8 @@ namespace WaypointManager
                         if (texInfo.name == icon)
                         {
                             content.Add(new GUIContent(texInfo.texture, texInfo.name));
+                            Log.Info("CustomWaypointGUI.InitIcons, loading texture from database: " + texInfo.name);
+                            Log.Info("InitIcons 3, adding: " + texInfo.name);
                             break;
                         }
                     }
@@ -300,7 +313,10 @@ namespace WaypointManager
                 //}
             }
 
-            // Initialize color list
+        }
+
+        public static void InitColors()
+        {
             if (colors == null)
             {
                 List<GUIContent> content = new List<GUIContent>();
@@ -338,91 +354,109 @@ namespace WaypointManager
                 disabledText.normal.textColor = Color.gray;
             }
 
+        }
+        public static void OnGUI()
+        {
+            // Initialize icon list
+            InitIcons();
+
+            // Initialize color list
+            InitColors();
+
 
             if (WaypointManager.Instance != null && WaypointManager.Instance.visible && !ImportExport.helpDialogVisible)
             {
-                if (windowMode != WindowMode.None && windowMode != WindowMode.Delete)
+                if (HighLogic.LoadedScene == GameScenes.FLIGHT || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
                 {
-                    wpWindowPos = ClickThruBlocker.GUILayoutWindow(
-                        typeof(WaypointManager).FullName.GetHashCode() + 2,
-                        wpWindowPos,
-                        WindowGUI,
-                        windowModeStr[(int)windowMode] + " Waypoint",
-                        GUILayout.Height(1), GUILayout.ExpandHeight(true));
-
-                    // Add the close icon
-                    if (GUI.Button(new Rect(wpWindowPos.xMax - 18, wpWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
+                    Log.Info("CustomWaypointGUI.OnGUI 1");
+                    //Log.Info("CustomWaypointGUI.OnGUI, WaypointManager.Instance.visible: " + WaypointManager.Instance.visible +
+                    //    ", ImportExport.helpDialogVisible: " + ImportExport.helpDialogVisible +
+                    //    ", HighLogic.LoadedScene: " + HighLogic.LoadedScene + ", WindowMode: " +windowMode.ToString());
+                    if (windowMode != WindowMode.None && windowMode != WindowMode.Delete)
                     {
-                        windowMode = WindowMode.None;
-                    }
-
-                    if (showIconPicker)
-                    {
-                        // Default iconPicker position
-                        if (iconPickerPosition.xMin == iconPickerPosition.xMax)
-                        {
-                            iconPickerPosition = new Rect((Screen.width - ICON_PICKER_WIDTH) / 2.0f, wpWindowPos.yMax, ICON_PICKER_WIDTH, 1);
-                        }
-
-                        iconPickerPosition = ClickThruBlocker.GUILayoutWindow(
-                            typeof(WaypointManager).FullName.GetHashCode() + 3,
-                            iconPickerPosition,
-                            IconPickerGUI,
-                            "Icon Selector");
+                        wpWindowPos = ClickThruBlocker.GUILayoutWindow(
+                            typeof(WaypointManager).FullName.GetHashCode() + 2,
+                            wpWindowPos,
+                            WindowGUI,
+                            windowModeStr[(int)windowMode] + " Waypoint",
+                            GUILayout.Height(1), GUILayout.ExpandHeight(true));
 
                         // Add the close icon
-                        if (GUI.Button(new Rect(iconPickerPosition.xMax - 18, iconPickerPosition.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
+                        if (GUI.Button(new Rect(wpWindowPos.xMax - 18, wpWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
                         {
-                            showIconPicker = false;
+                            windowMode = WindowMode.None;
+                        }
+
+                        if (showIconPicker)
+                        {
+                            // Default iconPicker position
+                            if (iconPickerPosition.xMin == iconPickerPosition.xMax)
+                            {
+                                iconPickerPosition = new Rect((Screen.width - ICON_PICKER_WIDTH) / 2.0f, wpWindowPos.yMax, ICON_PICKER_WIDTH, 1);
+                            }
+
+                            iconPickerPosition = ClickThruBlocker.GUILayoutWindow(
+                                typeof(WaypointManager).FullName.GetHashCode() + 3,
+                                iconPickerPosition,
+                                IconPickerGUI,
+                                "Icon Selector");
+
+                            // Add the close icon
+                            if (GUI.Button(new Rect(iconPickerPosition.xMax - 18, iconPickerPosition.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
+                            {
+                                showIconPicker = false;
+                            }
+                        }
+
+                        // Reset the position of the iconPicker window
+                        if (!showIconPicker)
+                        {
+                            iconPickerPosition.xMax = iconPickerPosition.xMin;
+                        }
+                    }
+                    else if (windowMode == WindowMode.Delete)
+                    {
+                        rmWindowPos = ClickThruBlocker.GUILayoutWindow(
+                            typeof(WaypointManager).FullName.GetHashCode() + 2,
+                            rmWindowPos,
+                            DeleteGUI,
+                            windowMode.ToString() + " Waypoint");
+
+                        // Add the close icon
+                        if (GUI.Button(new Rect(rmWindowPos.xMax - 18, rmWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
+                        {
+                            windowMode = WindowMode.None;
                         }
                     }
 
-                    // Reset the position of the iconPicker window
-                    if (!showIconPicker)
+                    if (showExportDialog)
                     {
-                        iconPickerPosition.xMax = iconPickerPosition.xMin;
+                        expWindowPos = ClickThruBlocker.GUILayoutWindow(
+                            typeof(WaypointManager).FullName.GetHashCode() + 3,
+                            expWindowPos,
+                            ExportGUI,
+                            "Overwrite export file?");
+
+                        // Add the close icon
+                        if (GUI.Button(new Rect(expWindowPos.xMax - 18, expWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
+                        {
+                            showExportDialog = false;
+                        }
+                    }
+
+                    if (mapLocationMode)
+                    {
+                        PlaceWaypointAtCursor();
+
+                        // Lock the waypoint if the user clicks
+                        if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
+                        {
+                            mapLocationMode = false;
+                        }
                     }
                 }
-                else if (windowMode == WindowMode.Delete)
-                {
-                    rmWindowPos = ClickThruBlocker.GUILayoutWindow(
-                        typeof(WaypointManager).FullName.GetHashCode() + 2,
-                        rmWindowPos,
-                        DeleteGUI,
-                        windowMode.ToString() + " Waypoint");
-
-                    // Add the close icon
-                    if (GUI.Button(new Rect(rmWindowPos.xMax - 18, rmWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
-                    {
-                        windowMode = WindowMode.None;
-                    }
-                }
-
-                if (showExportDialog)
-                {
-                    expWindowPos = ClickThruBlocker.GUILayoutWindow(
-                        typeof(WaypointManager).FullName.GetHashCode() + 3,
-                        expWindowPos,
-                        ExportGUI,
-                        "Overwrite export file?");
-
-                    // Add the close icon
-                    if (GUI.Button(new Rect(expWindowPos.xMax - 18, expWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
-                    {
-                        showExportDialog = false;
-                    }
-                }
-
-                if (mapLocationMode)
-                {
-                    PlaceWaypointAtCursor();
-
-                    // Lock the waypoint if the user clicks
-                    if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
-                    {
-                        mapLocationMode = false;
-                    }
-                }
+                else
+                    windowMode = WindowMode.None;
             }
         }
 
@@ -471,7 +505,7 @@ namespace WaypointManager
             GUILayout.BeginVertical();
 
             template.name = GUILayout.TextField(template.name);
-
+            Log.Info("WindowGUI, template.name: " + template.name);
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
             GUILayout.Label("Latitude", GUILayout.Width(68));
@@ -579,7 +613,8 @@ namespace WaypointManager
                 {
                     CustomWaypoints.AddWaypoint(template);
                     selectedWaypoint = template;
-                    template = new Waypoint();
+                    template = InitWaypoint();
+                    //template = new Waypoint();
                 }
                 else
                 {
@@ -635,8 +670,11 @@ namespace WaypointManager
             }
             GUILayout.Space(4);
             GUILayout.EndHorizontal();
-            selectedColor = (int)GUILayout.HorizontalSlider((int)selectedColor, 0, 47);
-
+            using (new GUILayout.VerticalScope())
+            {
+                selectedColor = (int)GUILayout.HorizontalSlider((int)selectedColor, 0, 47);
+                GUILayout.Label("colored markers do NOT have the selected color applied)");
+            }
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("OK"))
             {
@@ -662,7 +700,15 @@ namespace WaypointManager
         /// </summary>
         public static void DrawMarker()
         {
+            InitIcons();
+
+            Log.Info($"DrawMarker, id: " + template.id + $", latitude: {latitude}   longitude: {longitude}   altitude: {altitude}");
             //Log.Info("DrawMarker, template.id: " + template.id);
+
+            string stackTrace = StackTraceUtility.ExtractStackTrace();
+            Log.Info(stackTrace);
+
+
             // Only handle on repaint events
             if (windowMode == WindowMode.Add && Event.current.type == EventType.Repaint)
             {
