@@ -63,64 +63,68 @@ namespace WaypointManager
         Vector2 scrollListPos = new Vector2();
         void WindowGUI(int id)
         {
-            GUILayout.BeginHorizontal();
-            scrollListPos = GUILayout.BeginScrollView(scrollListPos);
-            int cnt = -1;
-            foreach (var wayPointFile in waypointFiles)
+            using (new GUILayout.HorizontalScope())
             {
-                cnt++;
-                GUILayout.BeginHorizontal();
-                string str = wayPointFile.Replace("CustomWaypoints.", "");
-                str = str.Replace(".cfg", "");
-                if (selected == cnt)
-                    str = "--> " + str + " <--";
-                if (GUILayout.Button(str))
+                scrollListPos = GUILayout.BeginScrollView(scrollListPos);
+                int cnt = -1;
+                foreach (var wayPointFile in waypointFiles)
                 {
-                    selected = cnt;
+                    cnt++;
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        string str = wayPointFile.Replace("CustomWaypoints.", "");
+                        str = str.Replace(".cfg", "");
+                        if (selected == cnt)
+                            str = "--> " + str + " <--";
+                        if (GUILayout.Button(str))
+                        {
+                            selected = cnt;
+                        }
+                    }
                 }
-                GUILayout.EndHorizontal();
+                GUILayout.EndScrollView();
             }
-            GUILayout.EndScrollView();
-            GUILayout.EndHorizontal();
             GUILayout.FlexibleSpace();
-            GUILayout.BeginHorizontal();
-            GUI.enabled = (selected >= 0);
-            if (GUILayout.Button("Import"))
+            using (new GUILayout.HorizontalScope())
             {
-                ImportSelectedFile(selected);
-            }
-            GUI.enabled = true;
-            if (GUILayout.Button("OK") || exitCustomImport)
-            {
-                visible = false;
-                Destroy(this);
-            }
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            if (!ImportExport.helpDialogVisible && GUILayout.Button("Custom WP Help"))
-            {
-                helpDialogVisible = true;
-                DialogGUIBase[] options = new DialogGUIBase[2];
-
-                options[0] = new DialogGUIButton("Ok", () =>
+                GUI.enabled = (selected >= 0);
+                if (GUILayout.Button("Import"))
                 {
-                    helpDialogVisible = false;
-                });
-                options[1] = new DialogGUIButton("Close", () =>
+                    ImportSelectedFile(selected);
+                }
+                GUI.enabled = true;
+                if (GUILayout.Button("OK") || exitCustomImport)
                 {
-                    exitCustomImport = true;
-                    helpDialogVisible = false;
-                });
-
-                var multidialog = new MultiOptionDialog("waypointManager",
-                    "If you have custom waypoints in a file, you can add it to the directory for loading.\n\n" +
-                    "Put your custom file in the following directory:\n\nGameData/WaypointManager/PluginData/CustomWayPoints\n\n", "Custom File Help",
-                                        UI.StyleCache.Skin,
-                                      /*HighLogic.UISkin,*/ 450, options);
-
-                var _activePopup = PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), multidialog, false, HighLogic.UISkin, true);
+                    visible = false;
+                    Destroy(this);
+                }
             }
-            GUILayout.EndHorizontal();
+            using (new GUILayout.HorizontalScope())
+            {
+                if (!ImportExport.helpDialogVisible && GUILayout.Button("Custom WP Help"))
+                {
+                    helpDialogVisible = true;
+                    DialogGUIBase[] options = new DialogGUIBase[2];
+
+                    options[0] = new DialogGUIButton("Ok", () =>
+                    {
+                        helpDialogVisible = false;
+                    });
+                    options[1] = new DialogGUIButton("Close", () =>
+                    {
+                        exitCustomImport = true;
+                        helpDialogVisible = false;
+                    });
+
+                    var multidialog = new MultiOptionDialog("waypointManager",
+                        "If you have custom waypoints in a file, you can add it to the directory for loading.\n\n" +
+                        "Put your custom file in the following directory:\n\nGameData/WaypointManager/PluginData/CustomWayPoints\n\n", "Custom File Help",
+                                            UI.StyleCache.Skin,
+                                          /*HighLogic.UISkin,*/ 450, options);
+
+                    var _activePopup = PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), multidialog, false, HighLogic.UISkin, true);
+                }
+            }
             GUI.DragWindow();
         }
 
@@ -136,13 +140,13 @@ namespace WaypointManager
             int count = master.nodes.Count;
             if (count > 0)
             {
-                Log.Info("[WM] Imported " + count + " waypoint" + (count != 1 ? "s" : "") + " from " + wayPointFile);
+                Log.Info("[WaypointManager] Imported " + count + " waypoint" + (count != 1 ? "s" : "") + " from " + wayPointFile);
                 ScreenMessages.PostScreenMessage("Imported " + count + " waypoint" + (count != 1 ? "s" : "") + " from " + wayPointFile,
                     6.0f, ScreenMessageStyle.UPPER_CENTER);
             }
             else
             {
-                Log.Info("[WM] No new waypoints found to import");
+                Log.Info("[WaypointManager] No new waypoints found to import");
                 ScreenMessages.PostScreenMessage("No new waypoints found to import", 6f);
             }
 

@@ -86,6 +86,7 @@ namespace WaypointManager
             {
                 DestroyImmediate(this);
             }
+
         }
 
         void OnDestroy()
@@ -291,7 +292,6 @@ namespace WaypointManager
 
         private void ToggleWindowRightClick()
         {
-            Log.Info("ToggleWindowRightClick called, rightClickEnabled: " + rightClickEnabled);
             if (!rightClickEnabled)
             {
                 return;
@@ -438,41 +438,42 @@ namespace WaypointManager
             GUILayout.BeginVertical(GUILayout.Width(GUI_WIDTH));
 
             // Output grouping selectors
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Group by: ", GUILayout.ExpandWidth(false));
-            if (ContractSystem.Instance != null)
+            using (new GUILayout.HorizontalScope())
             {
-                if (GUILayout.Toggle(Config.displayMode == Config.DisplayMode.CONTRACT, "Contract"))
+                GUILayout.Label("Group by: ", GUILayout.ExpandWidth(false));
+                if (ContractSystem.Instance != null)
                 {
-                    Config.displayMode = Config.DisplayMode.CONTRACT;
+                    if (GUILayout.Toggle(Config.displayMode == Config.DisplayMode.CONTRACT, "Contract"))
+                    {
+                        Config.displayMode = Config.DisplayMode.CONTRACT;
+                    }
+                }
+                else
+                {
+                    Config.displayMode = Config.DisplayMode.CELESTIAL_BODY;
+                }
+                if (GUILayout.Toggle(Config.displayMode == Config.DisplayMode.CELESTIAL_BODY, "Celestial Body"))
+                {
+                    Config.displayMode = Config.DisplayMode.CELESTIAL_BODY;
+                }
+
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button(new GUIContent(Config.addWaypointIcon, "Create Custom Waypoint"), GUI.skin.label))
+                {
+                    CustomWaypointGUI.AddWaypoint();
+                }
+                GUILayout.Space(4);
+
+
+                if (GUILayout.Button(new GUIContent(Config.settingsIcon, "Settings"), GUI.skin.label))
+                {
+                    showSettings = !showSettings;
+                    if (!showSettings)
+                    {
+                        Config.Save();
+                    }
                 }
             }
-            else
-            {
-                Config.displayMode = Config.DisplayMode.CELESTIAL_BODY;
-            }
-            if (GUILayout.Toggle(Config.displayMode == Config.DisplayMode.CELESTIAL_BODY, "Celestial Body"))
-            {
-                Config.displayMode = Config.DisplayMode.CELESTIAL_BODY;
-            }
-
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button(new GUIContent(Config.addWaypointIcon, "Create Custom Waypoint"), GUI.skin.label))
-            {
-                CustomWaypointGUI.AddWaypoint();
-            }
-            GUILayout.Space(4);
-
-
-            if (GUILayout.Button(new GUIContent(Config.settingsIcon, "Settings"), GUI.skin.label))
-            {
-                showSettings = !showSettings;
-                if (!showSettings)
-                {
-                    Config.Save();
-                }
-            }
-            GUILayout.EndHorizontal();
 
             scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.ExpandWidth(true), GUILayout.Height(520));
 
@@ -530,99 +531,99 @@ namespace WaypointManager
                 return;
             }
 
-            GUILayout.BeginHorizontal(GUILayout.Height(32));
-
-            // Contract icon
-            GUILayout.Label(ContractIcon(wpd), GUILayout.ExpandWidth(false), GUILayout.Height(38), GUILayout.Width(38));
-            GUILayout.Space(2);
-
-            // Celestial body icon
-            GUILayout.Label(CelestialBodyIcon(wpd.celestialBody.name), GUILayout.ExpandWidth(false));
-            GUILayout.Space(2);
-
-            using (new GUILayout.VerticalScope())
+            using (new GUILayout.HorizontalScope(GUILayout.Height(32)))
             {
 
-                // Waypoint name, distance
-                using (new GUILayout.HorizontalScope())
-                {
-                    string name = wpd.waypoint.name;
-                    if (wpd.waypoint.isClustered)
-                    {
-                        name += " " + StringUtilities.IntegerToGreek(wpd.waypoint.index);
-                    }
-                    GUILayout.Label(name, labelStyle, GUILayout.Height(16), GUILayout.Width(GUI_WIDTH - 240), GUILayout.ExpandWidth(false));
-                    if (FlightGlobals.currentMainBody == wpd.celestialBody)
-                    {
-                        GUILayout.Label("Dist: " + Util.PrintDistance(wpd), labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
-                    }
-                }
+                // Contract icon
+                GUILayout.Label(ContractIcon(wpd), GUILayout.ExpandWidth(false), GUILayout.Height(38), GUILayout.Width(38));
+                GUILayout.Space(2);
 
-                // Waypoint location
-                using (new GUILayout.HorizontalScope())
-                {
-                    GUILayout.Label("Lat: " + Util.FormatCoordinate(wpd.waypoint.latitude, true), labelStyle, GUILayout.Height(16), GUILayout.Width(GUI_WIDTH / 2.0f - 72.0f), GUILayout.ExpandWidth(false));
-                    GUILayout.Label("Lon: " + Util.FormatCoordinate(wpd.waypoint.longitude, false), labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
-                }
+                // Celestial body icon
+                GUILayout.Label(CelestialBodyIcon(wpd.celestialBody.name), GUILayout.ExpandWidth(false));
+                GUILayout.Space(2);
 
-            }
-            GUILayout.FlexibleSpace();
-
-            if (CustomWaypoints.Instance.IsCustom(wpd.waypoint))
-            {
                 using (new GUILayout.VerticalScope())
                 {
-                    GUILayout.Space(8);
+
+                    // Waypoint name, distance
                     using (new GUILayout.HorizontalScope())
                     {
-
-                        if (GUILayout.Button(new GUIContent(Config.editWaypointIcon, "Edit Waypoint"), GUI.skin.label))
+                        string name = wpd.waypoint.name;
+                        if (wpd.waypoint.isClustered)
                         {
-                            CustomWaypointGUI.EditWaypoint(wpd.waypoint);
+                            name += " " + StringUtilities.IntegerToGreek(wpd.waypoint.index);
                         }
-                        if (GUILayout.Button(new GUIContent(Config.deleteWaypointIcon, "Delete Waypoint"), GUI.skin.label))
+                        GUILayout.Label(name, labelStyle, GUILayout.Height(16), GUILayout.Width(GUI_WIDTH - 240), GUILayout.ExpandWidth(false));
+                        if (FlightGlobals.currentMainBody == wpd.celestialBody)
                         {
-                            CustomWaypointGUI.DeleteWaypoint(wpd.waypoint);
+                            GUILayout.Label("Dist: " + Util.PrintDistance(wpd), labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
                         }
+                    }
 
+                    // Waypoint location
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        GUILayout.Label("Lat: " + Util.FormatCoordinate(wpd.waypoint.latitude, true), labelStyle, GUILayout.Height(16), GUILayout.Width(GUI_WIDTH / 2.0f - 72.0f), GUILayout.ExpandWidth(false));
+                        GUILayout.Label("Lon: " + Util.FormatCoordinate(wpd.waypoint.longitude, false), labelStyle, GUILayout.Height(16), GUILayout.ExpandWidth(false));
+                    }
+
+                }
+                GUILayout.FlexibleSpace();
+
+                if (CustomWaypoints.Instance.IsCustom(wpd.waypoint))
+                {
+                    using (new GUILayout.VerticalScope())
+                    {
+                        GUILayout.Space(8);
+                        using (new GUILayout.HorizontalScope())
+                        {
+
+                            if (GUILayout.Button(new GUIContent(Config.editWaypointIcon, "Edit Waypoint"), GUI.skin.label))
+                            {
+                                CustomWaypointGUI.EditWaypoint(wpd.waypoint);
+                            }
+                            if (GUILayout.Button(new GUIContent(Config.deleteWaypointIcon, "Delete Waypoint"), GUI.skin.label))
+                            {
+                                CustomWaypointGUI.DeleteWaypoint(wpd.waypoint);
+                            }
+
+                        }
                     }
                 }
-            }
-            else
-            {
+                else
+                {
 #if false
                 if (GUILayout.Button(new GUIContent(Config.editWaypointIcon, "Edit Stock Waypoint"), GUI.skin.label))
                 {
                     CustomWaypointGUI.EditWaypoint(wpd.waypoint, true);
                 }
 #endif
-                if (GUILayout.Button(new GUIContent(Config.deleteWaypointIcon, "Hide Stock Waypoint"), GUI.skin.label))
-                {
-                    CustomWaypointGUI.DeleteWaypoint(wpd.waypoint);
+                    if (GUILayout.Button(new GUIContent(Config.deleteWaypointIcon, "Hide Stock Waypoint"), GUI.skin.label))
+                    {
+                        CustomWaypointGUI.DeleteWaypoint(wpd.waypoint);
+                    }
+
                 }
 
+                // Active waypoint toggle
+                GUILayout.BeginVertical();
+                GUILayout.Space(8);
+                bool isNavPoint = Util.IsNavPoint(wpd.waypoint);
+                if (GUILayout.Toggle(isNavPoint, (string)null) != isNavPoint)
+                {
+                    if (isNavPoint)
+                    {
+                        NavWaypoint.fetch.Clear();
+                        NavWaypoint.fetch.Deactivate();
+                    }
+                    else
+                    {
+                        NavWaypoint.fetch.Setup(wpd.waypoint);
+                        NavWaypoint.fetch.Activate();
+                    }
+                }
+                GUILayout.EndVertical();
             }
-
-            // Active waypoint toggle
-            GUILayout.BeginVertical();
-            GUILayout.Space(8);
-            bool isNavPoint = Util.IsNavPoint(wpd.waypoint);
-            if (GUILayout.Toggle(isNavPoint, (string)null) != isNavPoint)
-            {
-                if (isNavPoint)
-                {
-                    NavWaypoint.fetch.Clear();
-                    NavWaypoint.fetch.Deactivate();
-                }
-                else
-                {
-                    NavWaypoint.fetch.Setup(wpd.waypoint);
-                    NavWaypoint.fetch.Activate();
-                }
-            }
-            GUILayout.EndVertical();
-
-            GUILayout.EndHorizontal();
 
             GUILayout.Space(6);
         }

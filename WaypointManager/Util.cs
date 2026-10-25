@@ -169,13 +169,6 @@ namespace WaypointManager
         public static Texture2D GetContractIcon(string url, int seed)
         {
             string key = url;
-            if (key.Contains("Transfer"))
-            {
-                Log.Info("WaypointManager icon, URL contains Transfer...., url: " + url);
-                string stackTrace = StackTraceUtility.ExtractStackTrace();
-                Log.Warning(stackTrace);
-
-            }
 #if false
             if (url == "dish")
             {
@@ -190,10 +183,6 @@ namespace WaypointManager
             if (!contractIcons.ContainsKey(key))
             {
                 contractIcons[key] = new Dictionary<Color, Texture2D>();
-
-                Log.Info("WaypointManager icon, url: " + url);
-                string stackTrace = StackTraceUtility.ExtractStackTrace();
-                Log.Warning(stackTrace);
             }
 
             if (!contractIcons[key].ContainsKey(color))
@@ -254,7 +243,7 @@ namespace WaypointManager
                 string url2 = url;
 
                 string tmp = url;
-                //Log.Info("GetContractIcon, url: " + url);
+
                 if (!tmp.Contains("PluginData"))
                 {
                     if (!url.StartsWith("GameData"))
@@ -267,7 +256,6 @@ namespace WaypointManager
                             if (GameDatabase.Instance.databaseTexture[i].name.EndsWith(tmp) ||
                                 GameDatabase.Instance.databaseTexture[i].name == url)
                             {
-                                Log.Info("GetContractIcon, Loading texture from database, url: "  + GameDatabase.Instance.databaseTexture[i].file.fullPath);
                                 url2 = GameDatabase.Instance.databaseTexture[i].file.fullPath;
                             }
                         }
@@ -290,11 +278,7 @@ namespace WaypointManager
                     Log.Error("key: " + key);
                     Log.Error("path: " + path);
 
-                    string stackTrace = StackTraceUtility.ExtractStackTrace();
-                    Log.Error(stackTrace);
                     //texture = contractIcons[key][color] = baseTexture;
-
-                    Log.Info("GetContractIcon, path: " + KSPUtil.ApplicationRootPath + path);
                          
                     return GetContractIcon("icon/marker", seed);
                 }

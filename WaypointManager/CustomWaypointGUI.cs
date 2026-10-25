@@ -175,8 +175,6 @@ namespace WaypointManager
             selectedColor = (int)(r.NextDouble() * seeds.Count());
             template.id = icons[selectedIcon].tooltip;
             template.seed = seeds[selectedColor];
-
-            Log.Info("id 1: " + template.id);
         }
 
         /// <summary>
@@ -264,7 +262,6 @@ namespace WaypointManager
 
                     //content.Add(new GUIContent(ContractDefs.sprites[name].texture, name));
                     content.Add(new GUIContent(icon, name));
-                    Log.Info("InitIcons 1, adding: " + name);
                 }
 
                 // Get all the directories for custom icons
@@ -284,7 +281,6 @@ namespace WaypointManager
                                 string name = "icon/" + GetNameFromID(str2);
                                 name = name.Substring(0, name.LastIndexOf('.'));
                                 content.Add(new GUIContent(icon, name));
-                                Log.Info("InitIcons 2, adding: " + name);
                             }
                         }
                     }
@@ -298,8 +294,6 @@ namespace WaypointManager
                         if (texInfo.name == icon)
                         {
                             content.Add(new GUIContent(texInfo.texture, texInfo.name));
-                            Log.Info("CustomWaypointGUI.InitIcons, loading texture from database: " + texInfo.name);
-                            Log.Info("InitIcons 3, adding: " + texInfo.name);
                             break;
                         }
                     }
@@ -368,7 +362,6 @@ namespace WaypointManager
             {
                 if (HighLogic.LoadedScene == GameScenes.FLIGHT || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
                 {
-                    Log.Info("CustomWaypointGUI.OnGUI 1");
                     //Log.Info("CustomWaypointGUI.OnGUI, WaypointManager.Instance.visible: " + WaypointManager.Instance.visible +
                     //    ", ImportExport.helpDialogVisible: " + ImportExport.helpDialogVisible +
                     //    ", HighLogic.LoadedScene: " + HighLogic.LoadedScene + ", WindowMode: " +windowMode.ToString());
@@ -464,17 +457,18 @@ namespace WaypointManager
         {
             GUILayout.BeginVertical();
             GUILayout.Label("Delete waypoint '" + selectedWaypoint.name + "'?");
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Yes"))
+            using (new GUILayout.HorizontalScope())
             {
-                CustomWaypoints.RemoveWaypoint(selectedWaypoint);
-                windowMode = WindowMode.None;
+                if (GUILayout.Button("Yes"))
+                {
+                    CustomWaypoints.RemoveWaypoint(selectedWaypoint);
+                    windowMode = WindowMode.None;
+                }
+                if (GUILayout.Button("No"))
+                {
+                    windowMode = WindowMode.None;
+                }
             }
-            if (GUILayout.Button("No"))
-            {
-                windowMode = WindowMode.None;
-            }
-            GUILayout.EndHorizontal();
             GUILayout.EndVertical();
 
             GUI.DragWindow();
@@ -484,17 +478,18 @@ namespace WaypointManager
         {
             GUILayout.BeginVertical();
             GUILayout.Label("Overwrite custom waypoint file '" + CustomWaypoints.CustomWaypointsFileName + "'?");
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Yes"))
+            using (new GUILayout.HorizontalScope())
             {
-                CustomWaypoints.DoExport();
-                showExportDialog = false;
+                if (GUILayout.Button("Yes"))
+                {
+                    CustomWaypoints.DoExport();
+                    showExportDialog = false;
+                }
+                if (GUILayout.Button("No"))
+                {
+                    showExportDialog = false;
+                }
             }
-            if (GUILayout.Button("No"))
-            {
-                showExportDialog = false;
-            }
-            GUILayout.EndHorizontal();
             GUILayout.EndVertical();
 
             GUI.DragWindow();
@@ -502,144 +497,142 @@ namespace WaypointManager
 
         private static void WindowGUI(int windowID)
         {
-            GUILayout.BeginVertical();
-
-            template.name = GUILayout.TextField(template.name);
-            Log.Info("WindowGUI, template.name: " + template.name);
-            GUILayout.BeginHorizontal();
-            GUILayout.BeginVertical();
-            GUILayout.Label("Latitude", GUILayout.Width(68));
-            GUILayout.Label("Longitude", GUILayout.Width(68));
-            GUILayout.EndVertical();
-
-            GUILayout.Space(4);
-
-            string val;
-            float floatVal;
-            GUILayout.BeginVertical();
-            val = GUILayout.TextField(latitude, GUILayout.Width(140));
-            if (float.TryParse(val, out floatVal))
+            using (new GUILayout.VerticalScope())
             {
-                latitude = val;
-                recalcAltitude = true;
-            }
-            val = GUILayout.TextField(longitude, GUILayout.Width(140));
-            if (float.TryParse(val, out floatVal))
-            {
-                longitude = val;
-                recalcAltitude = true;
-            }
 
-            GUILayout.EndVertical();
+                template.name = GUILayout.TextField(template.name);
 
-            GUILayout.Space(4);
-
-            GUILayout.BeginVertical();
-
-            if (GUILayout.Button(Util.GetContractIcon(template.id, template.seed), GUILayout.Width(40), GUILayout.Height(40)))
-            {
-                showIconPicker = !showIconPicker;
-
-                selectedIcon = Array.IndexOf(icons, icons.Where(c => c.tooltip == template.id));
-                //selectedIcon = Array.IndexOf(icons, icons.Where(c => c.tooltip == template.id).First());
-                selectedColor = Array.IndexOf(seeds, template.seed);
-                if (selectedIcon == -1)
+                string val;
+                float floatVal;
+                using (new GUILayout.HorizontalScope())
                 {
-                    selectedIcon = 0;
+                    using (new GUILayout.VerticalScope())
+                    {
+                        GUILayout.Label("Latitude", GUILayout.Width(68));
+                        GUILayout.Label("Longitude", GUILayout.Width(68));
+                    }
+
+                    GUILayout.Space(4);
+
+                    using (new GUILayout.VerticalScope())
+                    {
+                        val = GUILayout.TextField(latitude, GUILayout.Width(140));
+                        if (float.TryParse(val, out floatVal))
+                        {
+                            latitude = val;
+                            recalcAltitude = true;
+                        }
+                        val = GUILayout.TextField(longitude, GUILayout.Width(140));
+                        if (float.TryParse(val, out floatVal))
+                        {
+                            longitude = val;
+                            recalcAltitude = true;
+                        }
+
+                    }
+                    GUILayout.Space(4);
+
+                    using (new GUILayout.VerticalScope())
+                    {
+                        if (GUILayout.Button(Util.GetContractIcon(template.id, template.seed), GUILayout.Width(40), GUILayout.Height(40)))
+                        {
+                            showIconPicker = !showIconPicker;
+
+                            selectedIcon = Array.IndexOf(icons, icons.Where(c => c.tooltip == template.id));
+                            //selectedIcon = Array.IndexOf(icons, icons.Where(c => c.tooltip == template.id).First());
+                            selectedColor = Array.IndexOf(seeds, template.seed);
+                            if (selectedIcon == -1)
+                            {
+                                selectedIcon = 0;
+                            }
+                            if (selectedColor == -1)
+                            {
+                                selectedColor = 0;
+                            }
+                        }
+                    }
                 }
-                if (selectedColor == -1)
+                using (new GUILayout.HorizontalScope())
                 {
-                    selectedColor = 0;
+                    GUILayout.Space(80);
+                    if (GUILayout.Toggle(useTerrainHeight, new GUIContent("Use terrain height for altitude", "Automatically set the altitude to ground level.")) != useTerrainHeight)
+                    {
+                        useTerrainHeight = !useTerrainHeight;
+                        recalcAltitude = true;
+                    }
                 }
-            }
-            GUILayout.EndVertical();
-
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(80);
-            if (GUILayout.Toggle(useTerrainHeight, new GUIContent("Use terrain height for altitude", "Automatically set the altitude to ground level.")) != useTerrainHeight)
-            {
-                useTerrainHeight = !useTerrainHeight;
-                recalcAltitude = true;
-            }
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-
-            GUILayout.Label("Altitude", GUILayout.Width(72));
-            val = GUILayout.TextField(altitude, useTerrainHeight ? disabledText : GUI.skin.textField, GUILayout.Width(140));
-            if (!useTerrainHeight && float.TryParse(val, out floatVal))
-            {
-                altitude = val;
-            }
-            GUILayout.EndHorizontal();
-
-            if (HighLogic.LoadedScene == GameScenes.FLIGHT)
-            {
-                if (GUILayout.Button(new GUIContent("Use Active Vessel Location", "Set the location parameters to that of the currently active vessel.")))
+                using (new GUILayout.HorizontalScope())
                 {
-                    latitude = FlightGlobals.ActiveVessel.latitude.ToString();
-                    longitude = FlightGlobals.ActiveVessel.longitude.ToString();
-                    altitude = FlightGlobals.ActiveVessel.altitude.ToString();
-                    recalcAltitude = true;
+                    GUILayout.Label("Altitude", GUILayout.Width(72));
+                    val = GUILayout.TextField(altitude, useTerrainHeight ? disabledText : GUI.skin.textField, GUILayout.Width(140));
+                    if (!useTerrainHeight && float.TryParse(val, out floatVal))
+                    {
+                        altitude = val;
+                    }
                 }
-            }
-
-            if (HighLogic.LoadedScene == GameScenes.FLIGHT && MapView.MapIsEnabled || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-            {
-                string label = mapLocationMode ? "Cancel Set Location" : "Set Location on Map";
-                if (GUILayout.Button(new GUIContent(label, "Set the location by clicking on the map.")))
+                if (HighLogic.LoadedScene == GameScenes.FLIGHT)
                 {
-                    mapLocationMode = !mapLocationMode;
+                    if (GUILayout.Button(new GUIContent("Use Active Vessel Location", "Set the location parameters to that of the currently active vessel.")))
+                    {
+                        latitude = FlightGlobals.ActiveVessel.latitude.ToString();
+                        longitude = FlightGlobals.ActiveVessel.longitude.ToString();
+                        altitude = FlightGlobals.ActiveVessel.altitude.ToString();
+                        recalcAltitude = true;
+                    }
                 }
-            }
-            else
-            {
-                mapLocationMode = false;
-            }
 
-            GUILayout.BeginHorizontal();
-            bool save = GUILayout.Button("Save");
-            bool apply = GUILayout.Button("Apply");
-            bool cancel = GUILayout.Button("Cancel");
-            if (save || apply)
-            {
-                template.latitude = double.Parse(latitude);
-                template.longitude = double.Parse(longitude);
-                template.height = Util.WaypointHeight(template, targetBody);
-                template.altitude = double.Parse(altitude) - template.height;
-                if (windowMode == WindowMode.Add)
+                if (HighLogic.LoadedScene == GameScenes.FLIGHT && MapView.MapIsEnabled || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
                 {
-                    CustomWaypoints.AddWaypoint(template);
-                    selectedWaypoint = template;
-                    template = InitWaypoint();
-                    //template = new Waypoint();
+                    string label = mapLocationMode ? "Cancel Set Location" : "Set Location on Map";
+                    if (GUILayout.Button(new GUIContent(label, "Set the location by clicking on the map.")))
+                    {
+                        mapLocationMode = !mapLocationMode;
+                    }
                 }
                 else
                 {
-                    selectedWaypoint.id = template.id;
-                    Log.Info("id 3: " + template.id);
-                    selectedWaypoint.name = template.name;
-                    selectedWaypoint.latitude = template.latitude;
-                    selectedWaypoint.longitude = template.longitude;
-                    selectedWaypoint.altitude = template.altitude;
-                    selectedWaypoint.height = template.height;
-                    selectedWaypoint.seed = template.seed;
+                    mapLocationMode = false;
+                }
+
+                using (new GUILayout.HorizontalScope())
+                {
+                    bool save = GUILayout.Button("Save");
+                    bool apply = GUILayout.Button("Apply");
+                    bool cancel = GUILayout.Button("Cancel");
+                    if (save || apply)
+                    {
+                        template.latitude = double.Parse(latitude);
+                        template.longitude = double.Parse(longitude);
+                        template.height = Util.WaypointHeight(template, targetBody);
+                        template.altitude = double.Parse(altitude) - template.height;
+                        if (windowMode == WindowMode.Add)
+                        {
+                            CustomWaypoints.AddWaypoint(template);
+                            selectedWaypoint = template;
+                            template = InitWaypoint();
+                            //template = new Waypoint();
+                        }
+                        else
+                        {
+                            selectedWaypoint.id = template.id;
+                            selectedWaypoint.name = template.name;
+                            selectedWaypoint.latitude = template.latitude;
+                            selectedWaypoint.longitude = template.longitude;
+                            selectedWaypoint.altitude = template.altitude;
+                            selectedWaypoint.height = template.height;
+                            selectedWaypoint.seed = template.seed;
+                        }
+                    }
+                    if (save || cancel)
+                    {
+                        windowMode = WindowMode.None;
+                    }
+                    else if (apply)
+                    {
+                        EditWaypoint(selectedWaypoint);
+                    }
                 }
             }
-            if (save || cancel)
-            {
-                windowMode = WindowMode.None;
-            }
-            else if (apply)
-            {
-                EditWaypoint(selectedWaypoint);
-            }
-            GUILayout.EndHorizontal();
-
-            GUILayout.EndVertical();
-
             GUI.DragWindow();
 
             if (useTerrainHeight && recalcAltitude)
@@ -653,43 +646,44 @@ namespace WaypointManager
 
         private static void IconPickerGUI(int windowID)
         {
-            GUILayout.BeginVertical(GUILayout.Width(ICON_PICKER_WIDTH));
-            selectedIcon = GUILayout.SelectionGrid(selectedIcon, icons, 4, GUILayout.Width(ICON_PICKER_WIDTH), GUILayout.Height(ICON_PICKER_WIDTH));
+            using (new GUILayout.VerticalScope(GUILayout.Width(ICON_PICKER_WIDTH)))
+            {
+                selectedIcon = GUILayout.SelectionGrid(selectedIcon, icons, 4, GUILayout.Width(ICON_PICKER_WIDTH), GUILayout.Height(ICON_PICKER_WIDTH));
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(4);
-            colorLabelStyle.normal.background = colors[selectedColor].image as Texture2D;
-            GUILayout.Label(colors[selectedColor], colorLabelStyle, GUILayout.Width(288));
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(4);
-            foreach (GUIContent color in colors)
-            {
-                GUILayout.Label(color, colorWheelStyle, GUILayout.Width(6));
+                using (new GUILayout.HorizontalScope())
+                {
+                    GUILayout.Space(4);
+                    colorLabelStyle.normal.background = colors[selectedColor].image as Texture2D;
+                    GUILayout.Label(colors[selectedColor], colorLabelStyle, GUILayout.Width(288));
+                }
+                using (new GUILayout.HorizontalScope())
+                {
+                    GUILayout.Space(4);
+                    foreach (GUIContent color in colors)
+                    {
+                        GUILayout.Label(color, colorWheelStyle, GUILayout.Width(6));
+                    }
+                    GUILayout.Space(4);
+                }
+                using (new GUILayout.VerticalScope())
+                {
+                    selectedColor = (int)GUILayout.HorizontalSlider((int)selectedColor, 0, 47);
+                    GUILayout.Label("colored markers do NOT have the selected color applied)");
+                }
+                using (new GUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("OK"))
+                    {
+                        showIconPicker = false;
+                        template.id = icons[selectedIcon].tooltip;
+                        template.seed = seeds[selectedColor];
+                    }
+                    if (GUILayout.Button("Cancel"))
+                    {
+                        showIconPicker = false;
+                    }
+                }
             }
-            GUILayout.Space(4);
-            GUILayout.EndHorizontal();
-            using (new GUILayout.VerticalScope())
-            {
-                selectedColor = (int)GUILayout.HorizontalSlider((int)selectedColor, 0, 47);
-                GUILayout.Label("colored markers do NOT have the selected color applied)");
-            }
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("OK"))
-            {
-                showIconPicker = false;
-                template.id = icons[selectedIcon].tooltip;
-                Log.Info("id 4: " + template.id);
-                template.seed = seeds[selectedColor];
-            }
-            if (GUILayout.Button("Cancel"))
-            {
-                showIconPicker = false;
-            }
-            GUILayout.EndHorizontal();
-            GUILayout.EndVertical();
-
             GUI.DragWindow();
 
             WaypointManager.Instance.SetToolTip(windowID - typeof(WaypointManager).FullName.GetHashCode());
@@ -702,12 +696,7 @@ namespace WaypointManager
         {
             InitIcons();
 
-            Log.Info($"DrawMarker, id: " + template.id + $", latitude: {latitude}   longitude: {longitude}   altitude: {altitude}");
-            //Log.Info("DrawMarker, template.id: " + template.id);
-
-            string stackTrace = StackTraceUtility.ExtractStackTrace();
-            Log.Info(stackTrace);
-
+            // Log.Info($"DrawMarker, id: " + template.id + $", latitude: {latitude}   longitude: {longitude}   altitude: {altitude}");
 
             // Only handle on repaint events
             if (windowMode == WindowMode.Add && Event.current.type == EventType.Repaint)

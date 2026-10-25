@@ -414,7 +414,6 @@ namespace WaypointManager
 
                 // Draw the marker
                 Graphics.DrawTexture(markerRect, GameDatabase.Instance.GetTexture("Squad/Contracts/Icons/marker", false), new Rect(0.0f, 0.0f, 1f, 1f), 0, 0, 0, 0, new Color(0.5f, 0.5f, 0.5f, 0.5f * (wpd.currentAlpha - 0.3f) / 0.7f));
-                Log.Info("DrawWaypoint, Loading texture from database, url: " + "Squad/Contracts/Icons/marker");
 
                 // Draw the icon, but support blinking
                 if (!Util.IsNavPoint(wpd.waypoint) || !NavWaypoint.fetch.IsBlinking || (int)((Time.fixedTime - (int)Time.fixedTime) * 4) % 2 == 0)

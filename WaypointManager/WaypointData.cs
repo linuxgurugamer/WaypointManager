@@ -151,7 +151,6 @@ namespace WaypointManager
                     foreach (var b in bodies)
                     {
                         var name = b.GetValue("name");
-                        Log.Info("name: " + name + ", homeBody: " + FlightGlobals.GetHomeBodyName() + ", GetHomeBody: " + FlightGlobals.GetHomeBody().bodyName);
                         if (name == FlightGlobals.GetHomeBodyName() || name == "Kerbin")
                         {
                             var pqs = b.GetNodes("PQS");
@@ -215,7 +214,6 @@ namespace WaypointManager
                 }
                 if (w != null && w.isNavigatable)
                 {
-                    //Log.Info("cnt: " + cnt + ", name: " + w.name + ", w.isClustered: " + w.isClustered + ", w.isCustom: " + w.isCustom + ", isMission: " + w.isMission);
                     WaypointData wpd;
                     // Update values that are only cached once
                     if (!waypointData.ContainsKey(w))
@@ -278,7 +276,6 @@ namespace WaypointManager
 #if false
             if (waypointsToRemove.Count > 0)
             {
-                //Log.Info("Waypoints to remove: " + waypointsToRemove.Count);
                 foreach (var w in waypointsToRemove)
                 {
 #if false
