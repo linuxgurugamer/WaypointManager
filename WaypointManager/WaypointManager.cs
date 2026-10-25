@@ -364,24 +364,33 @@ namespace WaypointManager
 
         void OnGUI()
         {
+            Debug.Log("[WaypointManager] OnGUI 1");
             // Build the cache of waypoint data
             if (Event.current.type == EventType.Layout)
             {
                 WaypointData.CacheWaypointData();
             }
+            Debug.Log("[WaypointManager] OnGUI 2");
 
             SetupStyles();
 
             GUI.depth = 0;
+            Debug.Log("[WaypointManager] OnGUI 3");
 
             if (showGUI && visible && !ImportExport.helpDialogVisible)
             {
-                var ainfoV = Attribute.GetCustomAttribute(GetType().Assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
+                //var ainfoV = Attribute.GetCustomAttribute(GetType().Assembly, typeof(AssemblyInformationalVersionAttribute)) as AssemblyInformationalVersionAttribute;
+
+                Version version = Assembly.GetExecutingAssembly().GetName().Version;
+                string versionString = version.ToString();
+
+                Debug.Log("[WaypointManager] OnGUI 4");
+
                 Config.mainWindowPos = ClickThruBlocker.GUILayoutWindow(
                     GetType().FullName.GetHashCode(),
                     Config.mainWindowPos,
                     WindowGUI,
-                    "Waypoint Manager " + ainfoV.InformationalVersion);
+                    "Waypoint Manager " + versionString); // ainfoV.InformationalVersion);
 
                 // Add the close icon
                 if (GUI.Button(new Rect(Config.mainWindowPos.xMax - 18, Config.mainWindowPos.yMin + 2, 16, 16), Config.closeIcon, GUI.skin.label))
@@ -418,6 +427,7 @@ namespace WaypointManager
                     settingsPosition.xMax = settingsPosition.xMin;
                 }
             }
+            Debug.Log("[WaypointManager] OnGUI 5");
 
             // Display custom waypoint gui windows
             if (!ImportExport.helpDialogVisible)
