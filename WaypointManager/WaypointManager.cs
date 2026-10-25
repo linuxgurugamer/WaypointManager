@@ -364,18 +364,15 @@ namespace WaypointManager
 
         void OnGUI()
         {
-            Debug.Log("[WaypointManager] OnGUI 1");
             // Build the cache of waypoint data
             if (Event.current.type == EventType.Layout)
             {
                 WaypointData.CacheWaypointData();
             }
-            Debug.Log("[WaypointManager] OnGUI 2");
 
             SetupStyles();
 
             GUI.depth = 0;
-            Debug.Log("[WaypointManager] OnGUI 3");
 
             if (showGUI && visible && !ImportExport.helpDialogVisible)
             {
@@ -384,7 +381,6 @@ namespace WaypointManager
                 Version version = Assembly.GetExecutingAssembly().GetName().Version;
                 string versionString = version.ToString();
 
-                Debug.Log("[WaypointManager] OnGUI 4");
 
                 Config.mainWindowPos = ClickThruBlocker.GUILayoutWindow(
                     GetType().FullName.GetHashCode(),
@@ -427,7 +423,6 @@ namespace WaypointManager
                     settingsPosition.xMax = settingsPosition.xMin;
                 }
             }
-            Debug.Log("[WaypointManager] OnGUI 5");
 
             // Display custom waypoint gui windows
             if (!ImportExport.helpDialogVisible)

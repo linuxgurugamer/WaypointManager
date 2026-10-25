@@ -1,6 +1,6 @@
 Changelog
 
-2.8.5 (unreleased)
+2.8.5 
 	From github user @clayell:
 		Added support for Kopernicus City2 waypoints
 	Added code to show the Kopernicus buttons only when available
