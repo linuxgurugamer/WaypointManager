@@ -601,10 +601,17 @@ namespace WaypointManager
                     bool cancel = GUILayout.Button("Cancel");
                     if (save || apply)
                     {
-                        template.latitude = double.Parse(latitude);
-                        template.longitude = double.Parse(longitude);
+                        //template.latitude = double.Parse(latitude);
+                        template.latitude = double.TryParse(latitude, out double value) ? value : 0;
+
+                        //template.longitude = double.Parse(longitude);
+                        template.longitude = double.TryParse(longitude, out double value2) ? value2 : 0;
+
                         template.height = Util.WaypointHeight(template, targetBody);
-                        template.altitude = double.Parse(altitude) - template.height;
+
+                        //template.altitude = double.Parse(altitude) - template.height;
+                        template.altitude = double.TryParse(altitude, out double value3) ? value3 : 0;
+
                         if (windowMode == WindowMode.Add)
                         {
                             CustomWaypoints.AddWaypoint(template);

@@ -10,7 +10,7 @@ rem    but not always
 set H=%KSPDIR%
 rem set H1=R:\KSP_1.12.5-RP-1
 
-rem set H=R:\KSP\KSP_1.12.5-Clayel
+set H=R:\KSP\KSP_1.12.5-Clayel
 set GAMEDIR=WaypointManager
 set GAMEDATA="GameData"
 set VERSIONFILE=%GAMEDIR%.version

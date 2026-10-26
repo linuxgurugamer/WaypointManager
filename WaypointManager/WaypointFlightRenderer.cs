@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using KSP;
-using KSP.UI.Screens;
+﻿using ClickThroughFix;
 using Contracts;
 using FinePrint;
 using FinePrint.Utilities;
-using ClickThroughFix;
+using KSP.UI.Screens;
+using System;
+using UnityEngine;
 using static WaypointManager.RegisterToolbar;
-using static FinePrint.ContractDefs;
 
 namespace WaypointManager
 {
@@ -44,9 +39,10 @@ namespace WaypointManager
                 Destroy(this);
             }
 
-            GameEvents.onGameSceneLoadRequested.Add(new EventData<GameScenes>.OnEvent(OnGameSceneLoadRequested));
+            GameEvents.onGameSceneLoadRequested.Add(OnGameSceneLoadRequested);
             GameEvents.onHideUI.Add(new EventVoid.OnEvent(OnHideUI));
             GameEvents.onShowUI.Add(new EventVoid.OnEvent(OnShowUI));
+            GameEvents.onLevelWasLoaded.Add(onLevelWasLoaded);
 
             Instance = this;
         }
@@ -54,7 +50,8 @@ namespace WaypointManager
         static WaypointFlightRenderer Instance;
         protected void OnDestroy()
         {
-            GameEvents.onGameSceneLoadRequested.Remove(new EventData<GameScenes>.OnEvent(OnGameSceneLoadRequested));
+            GameEvents.onGameSceneLoadRequested.Remove(OnGameSceneLoadRequested);
+            GameEvents.onLevelWasLoaded.Remove(onLevelWasLoaded);
             GameEvents.onHideUI.Remove(OnHideUI);
             GameEvents.onShowUI.Remove(OnShowUI);
         }
@@ -62,11 +59,13 @@ namespace WaypointManager
         static void OnHotUnload(MonoBehaviour newObject)
         {
             //Debug.Log("[WaypointManager] WaypointFlightRenderer.OnHotUnload");
-            GameEvents.onGameSceneLoadRequested.Remove(new EventData<GameScenes>.OnEvent(Instance.OnGameSceneLoadRequested));
+            GameEvents.onGameSceneLoadRequested.Remove(Instance.OnGameSceneLoadRequested);
+            GameEvents.onLevelWasLoaded.Remove(Instance.onLevelWasLoaded);
             GameEvents.onHideUI.Remove(Instance.OnHideUI);
             GameEvents.onShowUI.Remove(Instance.OnShowUI);
 
-            GameEvents.onGameSceneLoadRequested.Add(new EventData<GameScenes>.OnEvent(((WaypointFlightRenderer)newObject).OnGameSceneLoadRequested));
+            GameEvents.onGameSceneLoadRequested.Add(Instance.OnGameSceneLoadRequested);
+            GameEvents.onLevelWasLoaded.Add(Instance.onLevelWasLoaded);
             GameEvents.onHideUI.Add(((WaypointFlightRenderer)newObject).OnHideUI);
             GameEvents.onShowUI.Add(((WaypointFlightRenderer)newObject).OnShowUI);
 
@@ -75,10 +74,33 @@ namespace WaypointManager
         {
         }
 
-
         public void OnGameSceneLoadRequested(GameScenes gameScene)
         {
-            asb = null;
+            if (WaypointData.cityWaypoints != null && Instance != null)
+            {
+                // Log.Info("WaypointFlightRenderer.OnGameSceneLoadRequested, gameScene: " + gameScene + ", # CITY2: " + WaypointData.cityWaypoints.Count);
+
+                Instance.asb = null;
+                if (gameScene == GameScenes.EDITOR)
+                {
+                    foreach (var wp in WaypointData.cityWaypoints)
+                        FinePrint.WaypointManager.RemoveWaypoint(wp);
+                }
+            }
+        }
+
+        void onLevelWasLoaded(GameScenes gameScene)
+        {
+            if (WaypointData.cityWaypoints != null)
+            {
+                // Log.Info("WaypointFlightRenderer.onLevelWasLoaded, gameScene: " + gameScene + ", # CITY2: " + WaypointData.cityWaypoints.Count);
+
+                if (gameScene == GameScenes.TRACKSTATION || gameScene == GameScenes.FLIGHT)
+                {
+                    foreach (var wp in WaypointData.cityWaypoints)
+                        FinePrint.WaypointManager.AddWaypoint(wp);
+                }
+            }
         }
 
         public void OnHideUI()
@@ -130,7 +152,7 @@ namespace WaypointManager
                 }
                 else
                     if (drag && !b)
-                    OnMouseUp();
+                        OnMouseUp();
                 drag = b;
 
             }
@@ -149,10 +171,12 @@ namespace WaypointManager
                     }
 
                     if (CustomWaypointGUI.windowMode != CustomWaypointGUI.WindowMode.None)
-                    if (HighLogic.LoadedScene == GameScenes.FLIGHT || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
                     {
-                        // Draw the marker for custom waypoints that are currently being created
-                        CustomWaypointGUI.DrawMarker();
+                        if (HighLogic.LoadedScene == GameScenes.FLIGHT || HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+                        {
+                            // Draw the marker for custom waypoints that are currently being created
+                            CustomWaypointGUI.DrawMarker();
+                        }
                     }
 
                     if (HighLogic.LoadedSceneIsFlight && !MapView.MapIsEnabled)
@@ -204,7 +228,7 @@ namespace WaypointManager
         {
             if (OldUIScale == GameSettings.UI_SCALE && oldScaling == Config.scaling && !forceUpdate)
             {
-                if (cnt++ >1)
+                if (cnt++ > 1)
                     return;
             }
             OldUIScale = GameSettings.UI_SCALE;

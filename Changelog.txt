@@ -19,6 +19,8 @@ Changelog
 	For development, added code to support the HotReload mod
 	Fixed issue where opening the Add/Del Waypoint window in the Tracking Station and then going back to the Space Center without closing the windows would see the windows remain open
 	Converted all GUILayout.BeginHorizontal/GUILayout.EndHorizontal and GUILayout.BeginVertical/GUIlayout.EndVertical to using the newer HorizontalScope/VerticalScope
+	Added code to prevent invalid numbers from causing errors when entering a manual waypoint
+	Added code to delete CITY2 waypoints when leaving Flight or Tracking Station, and add them back when returning
 
 2.8.4.8 
 	Thanks to github user @Clayell for this:

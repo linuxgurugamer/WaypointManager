@@ -77,6 +77,7 @@ namespace WaypointManager
         /// </summary>
         public static IEnumerable<KeyValuePair<CelestialBody, List<WaypointData>>> WaypointByBody { get { return waypointByBody.AsEnumerable(); } }
         static ConfigNode[] city2nodes = new ConfigNode[0];
+        internal static List<Waypoint> cityWaypoints = new List<Waypoint>();
         internal static void AddKopernicusNodes()
         {
             FindKopernicusNodes();
@@ -117,7 +118,9 @@ namespace WaypointManager
                 wp.isNavigatable = true;
                 wp.enableTooltip = true;
                 wp.enableMarker = true;
+                wp.navigationId = Guid.Empty;
 
+                cityWaypoints.Add(wp);
                 FinePrint.WaypointManager.AddWaypoint(wp);
 
                 WaypointManager.kopernicusNodesAdded = true;
@@ -129,14 +132,18 @@ namespace WaypointManager
             FindKopernicusNodes();
             foreach (var city in city2nodes)
             {
+#if false
                 var objectName = city.GetValue("objectName");
                 foreach (var wp in FinePrint.WaypointManager.Instance().Waypoints.Where(wp => wp.name == objectName).ToList())
+#else
+                foreach (var wp in cityWaypoints)
+#endif
                 {
                     FinePrint.WaypointManager.RemoveWaypoint(wp);
                 }
             }
             WaypointManager.kopernicusNodesAdded = false;
-
+            cityWaypoints.Clear();
         }
 
         private static void FindKopernicusNodes()
