@@ -276,7 +276,9 @@ namespace WaypointManager
 
                 if (!ToolbarControl.LoadImageFromFile(ref loadedTexture, KSPUtil.ApplicationRootPath + path))
                 {
+#if !DEBUG
                     if (!unloadableUrls.ContainsKey(url))
+#endif
                     {
                         unloadableUrls[key] = key;
                         Log.Error("WaypointManager: Couldn't create texture for '" + url + "'!");
