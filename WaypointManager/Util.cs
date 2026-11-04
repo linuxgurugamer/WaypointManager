@@ -159,6 +159,8 @@ namespace WaypointManager
             return navPoint.Latitude == waypoint.latitude && navPoint.Longitude == waypoint.longitude;
         }
 
+       static Dictionary<string, string> unloadableUrls = new Dictionary<string, string>();
+
         /// <summary>
         /// Gets the contract icon for the given id and seed (color).
         /// </summary>
@@ -274,15 +276,23 @@ namespace WaypointManager
 
                 if (!ToolbarControl.LoadImageFromFile(ref loadedTexture, KSPUtil.ApplicationRootPath + path))
                 {
-                    Log.Error("WaypointManager: Couldn't create texture for '" + url + "'!");
-                    Log.Error("key: " + key);
-                    Log.Error("path: " + path);
-
+                    if (!unloadableUrls.ContainsKey(url))
+                    {
+                        unloadableUrls[key] = key;
+                        Log.Error("WaypointManager: Couldn't create texture for '" + url + "'!");
+                        Log.Error("key: " + key);
+                        Log.Error("path: " + path);
+                    }
                     //texture = contractIcons[key][color] = baseTexture;
                          
                     return GetContractIcon("icon/marker", seed);
                 }
-
+                else
+                {
+                    //Log.Info("WaypointManager: Texture found: '" + url + "'!");
+                    contractIcons[key][color] = loadedTexture;
+                    return loadedTexture;
+                }
 
 #if false
                 try
