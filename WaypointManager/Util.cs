@@ -179,6 +179,10 @@ namespace WaypointManager
                 //url = "dish";
             }
 #endif
+            // Known-unloadable icon: skip straight to the default marker (no disk access, no log spam)
+            if (key != "icon/marker" && unloadableUrls.ContainsKey(key))
+                return GetContractIcon("icon/marker", seed);
+
             // Check cache for texture
             Texture2D texture = null;
             Color color = SystemUtilities.RandomColor(seed, 1.0f, 1.0f, 1.0f);
@@ -265,7 +269,7 @@ namespace WaypointManager
                 }
                 else
                 {
-                    if (!url2.StartsWith("GameData"))
+                    if (!url2.StartsWith("GameData") && !System.IO.Path.IsPathRooted(url2))
                         url2 = KSPUtil.ApplicationRootPath + "GameData/" + url2;
                 }
 
@@ -274,10 +278,11 @@ namespace WaypointManager
                 if (path.EndsWith(".png") || path.EndsWith(".dds"))
                     path = path.Substring(0, path.Length - 4);
 
-                if (!ToolbarControl.LoadImageFromFile(ref loadedTexture, KSPUtil.ApplicationRootPath + path))
+                string loadPath = System.IO.Path.IsPathRooted(path) ? path : KSPUtil.ApplicationRootPath + path;
+                if (!ToolbarControl.LoadImageFromFile(ref loadedTexture, loadPath))
                 {
 #if !DEBUG
-                    if (!unloadableUrls.ContainsKey(url))
+                    if (!unloadableUrls.ContainsKey(key))
 #endif
                     {
                         unloadableUrls[key] = key;
