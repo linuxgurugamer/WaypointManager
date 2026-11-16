@@ -1,5 +1,9 @@
 Changelog
 
+2.8.5.2
+	Thanks to github user @RafalLauterbach for this:
+		Fix log spam if path couldn't be found (only happened when other mods add icons)
+
 2.8.5.1
 	Added code to prevent spamming of log messages when a bad icon path is loaded, now only logs the first time a bad path is loaded
 	Fixed issue where loaded textures were not being returned.
